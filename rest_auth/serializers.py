@@ -57,7 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password1'],
-            active=True,
+            is_active=True,
         )
 
         # TODO: user activation through email confirmation.
@@ -66,7 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         if require_email_confirmation:
-            user.active = False
+            user.is_active = False
 
         return user
 
