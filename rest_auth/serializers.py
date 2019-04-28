@@ -34,6 +34,13 @@ class UserSerializer(serializers.ModelSerializer):
             'password1', 'password2',
         )
 
+        extra_kwargs = {
+            UserModel.EMAIL_FIELD: {
+                'required': True,
+                'allow_blank': False,
+            },
+        }
+
     def validate(self, data):
         password1 = data.get('password1')
         password2 = data.get('password2')
