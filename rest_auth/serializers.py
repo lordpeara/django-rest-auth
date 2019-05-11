@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
     )
     password2 = serializers.CharField(
         label=_('Password Confirmation'),
-        help_text=_("Enter the same password as before, for verification."),
+        help_text=_('Enter the same password as before, for verification.'),
         write_only=True,
         style={'input_type': 'password'},
     )
@@ -92,8 +92,8 @@ class LoginSerializer(serializers.Serializer):
 
     default_error_messages = {
         'invalid_login': _(
-            "Please enter a correct %(username)s and password. "
-            "Note that both fields may be case-sensitive."
+            'Please enter a correct %(username)s and password. '
+            'Note that both fields may be case-sensitive.'
         ),
         'inactive': _('This account is inactive.'),
     }
