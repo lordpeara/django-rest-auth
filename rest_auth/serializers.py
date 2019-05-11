@@ -32,12 +32,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = (
-            UserModel.USERNAME_FIELD, UserModel.EMAIL_FIELD,
+            UserModel.USERNAME_FIELD, UserModel.get_email_field_name(),
             'password1', 'password2',
         )
 
         extra_kwargs = {
-            UserModel.EMAIL_FIELD: {
+            UserModel.get_email_field_name(): {
                 'required': True,
                 'allow_blank': False,
             },
@@ -47,8 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
         password1 = data.get('password1')
         password2 = data.get('password2')
 
-        data['password2'] =\
-            self._validate_password2(password1, password2)
+        data['password2'] = self._validate_password2(password1, password2)
 
         return data
 
