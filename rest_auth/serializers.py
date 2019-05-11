@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
@@ -126,3 +128,37 @@ class LoginSerializer(serializers.Serializer):
 
     def get_user(self):
         return self.user
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        label=_('Email'), max_length=254,
+    )
+
+    password_reset_form_class = PasswordResetForm
+
+    def validate_email(self, value):
+        self.form = self.password_reset_form_class(data=self.initial_data)
+        if not self.form.is_valid():
+            if 'email' in self.form.errors:
+                raise serializers.ValidationError(self.form.errors['email'])
+            # XXX non email errors should be catched & re-raised
+            # (if django's PasswordResetForm add new fields)
+
+        return value
+
+    def save(self, domain_override=None,
+             subject_template_name='registration/password_reset_subject.txt',
+             email_template_name='registration/password_reset_email.html',
+             use_https=True, token_generator=default_token_generator,
+             from_email=None, request=None, html_email_template_name=None,
+             extra_email_context=None):
+
+        return self.form.save(
+            domain_override=domain_override,
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name, use_https=use_https,
+            token_generator=token_generator, from_email=from_email,
+            request=request, html_email_template_name=html_email_template_name,
+            extra_email_context=extra_email_context,
+        )
