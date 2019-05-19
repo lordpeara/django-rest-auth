@@ -161,3 +161,76 @@ class PasswordResetSerializer(serializers.Serializer):
             request=request, html_email_template_name=html_email_template_name,
             extra_email_context=extra_email_context,
         )
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    new_password1 = serializers.CharField(
+        label=_('New password'),
+        validators=[password_validation.validate_password],
+        help_text=password_validation.password_validators_help_text_html,
+        write_only=True,
+        style={'input_type': 'password'},
+    )
+
+    new_password2 = serializers.CharField(
+        label=_('New password Confirmation'),
+        help_text=_('Enter the same password as before, for verification.'),
+        write_only=True,
+        style={'input_type': 'password'},
+    )
+
+    default_error_messages = {
+        'password_mismatch': _('2 passwords should be equal'),
+    }
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(SetPasswordSerializer, self).__init__(*args, **kwargs)
+
+    def validate(self, data):
+        password1 = data.get('new_password1')
+        password2 = data.get('new_password2')
+
+        data['new_password2'] =\
+            self._validate_new_password2(password1, password2)
+
+        return data
+
+    def _validate_new_password2(self, password1, password2):
+        if password1 != password2:
+            raise serializers.ValidationError(
+                self.error_messages['password_mismatch'],
+                code='password_mismatch',
+            )
+
+        return password2
+
+    def save(self, commit=True):
+        password = self.validated_data['new_password1']
+        self.user.set_password(password)
+        if commit:
+            self.user.save()
+
+        return self.user
+
+
+class PasswordChangeSerializer(SetPasswordSerializer):
+    old_password = serializers.CharField(
+        label=_('Old password'),
+        write_only=True,
+        style={'input_type': 'password'},
+    )
+
+    default_error_messages = {
+        'password_incorrect': _('Your old password was entered incorrectly. '
+                                'Please enter it again.'),
+    }
+
+    def validate_old_password(self, old_password):
+        if not self.user.check_password(old_password):
+            raise serializers.ValidationError(
+                self.error_messages['password_incorrect'],
+                code='password_incorrect'
+            )
+
+        return old_password
