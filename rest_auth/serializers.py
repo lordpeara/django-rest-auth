@@ -101,13 +101,13 @@ class LoginSerializer(serializers.Serializer):
         self.request = request
         self.user = None
 
-        super(LoginSerializer, self).__init__(self, request, *args, **kwargs)
+        super(LoginSerializer, self).__init__(request, *args, **kwargs)
 
     def validate(self, data):
         username = data['username']
         password = data['password']
 
-        self.user = auth.authenticate(username, password)
+        self.user = auth.authenticate(username=username, password=password)
         if self.user is None:
             raise serializers.ValidationError(
                 self.error_messages['invalid_login'],
@@ -183,7 +183,7 @@ class SetPasswordSerializer(serializers.Serializer):
         'password_mismatch': _('2 passwords should be equal'),
     }
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         self.user = user
         super(SetPasswordSerializer, self).__init__(*args, **kwargs)
 
