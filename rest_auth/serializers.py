@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(
         label=_('Password'),
         validators=[password_validation.validate_password],
-        help_text=password_validation.password_validators_help_text_html,
+        help_text=password_validation.password_validators_help_text_html(),
         write_only=True,
         style={'input_type': 'password'},
     )
@@ -167,7 +167,7 @@ class SetPasswordSerializer(serializers.Serializer):
     new_password1 = serializers.CharField(
         label=_('New password'),
         validators=[password_validation.validate_password],
-        help_text=password_validation.password_validators_help_text_html,
+        help_text=password_validation.password_validators_help_text_html(),
         write_only=True,
         style={'input_type': 'password'},
     )
