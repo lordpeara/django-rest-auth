@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.contrib.auth import (
     login as auth_login,
     logout as auth_logout,
@@ -67,7 +68,7 @@ class LogoutView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         auth_logout(request)
-        return response.Response({}, status=status.HTTP_200_OK)
+        return response.Response(None, status=status.HTTP_200_OK)
 
 
 class PasswordForgotMixin(object):
@@ -76,9 +77,21 @@ class PasswordForgotMixin(object):
     def forgot(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(domain_override='eugene.com')
 
-        return response.Response({}, status=status.HTTP_200_OK)
+        email_opts = self.get_email_opts(request=request)
+        self.send_mail(serializer, **email_opts)
+
+        return response.Response(None, status=status.HTTP_200_OK)
+
+    def get_email_opts(self, **opts):
+        email_opts = {}
+        email_opts.update(getattr(settings, 'REST_AUTH_EMAIL_OPTIONS', {}))
+        email_opts.update(opts)
+
+        return email_opts
+
+    def send_mail(self, serializer, **opts):
+        serializer.save(**opts)
 
 
 class PasswordForgotView(PasswordForgotMixin, generics.GenericAPIView):
@@ -109,7 +122,7 @@ class PasswordChangeMixin(object):
         serializer = self.get_serializer(user=request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return response.Response({})
+        return response.Response(None)
 
 
 class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):

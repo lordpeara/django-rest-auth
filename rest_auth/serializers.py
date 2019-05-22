@@ -91,7 +91,7 @@ class LoginSerializer(serializers.Serializer):
 
     default_error_messages = {
         'invalid_login': _(
-            'Please enter a correct %(username)s and password. '
+            'Please enter a correct username and password. '
             'Note that both fields may be case-sensitive.'
         ),
         'inactive': _('This account is inactive.'),
@@ -111,7 +111,7 @@ class LoginSerializer(serializers.Serializer):
         if self.user is None:
             raise serializers.ValidationError(
                 self.error_messages['invalid_login'],
-                code='invalid_login'
+                code='invalid_login',
             )
 
         self._confirm_login_allowed(self.user)
