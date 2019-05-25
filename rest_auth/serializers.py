@@ -173,7 +173,7 @@ class SetPasswordSerializer(serializers.Serializer):
     )
 
     new_password2 = serializers.CharField(
-        label=_('New password Confirmation'),
+        label=_('New password confirmation'),
         help_text=_('Enter the same password as before, for verification.'),
         write_only=True,
         style={'input_type': 'password'},

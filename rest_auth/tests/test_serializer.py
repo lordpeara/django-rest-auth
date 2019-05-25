@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 
 from rest_framework.settings import api_settings
 
-from .serializers import UserSerializer
+from rest_auth.serializers import UserSerializer
 
 
 class UserSerializerTest(TestCase):
@@ -19,16 +19,17 @@ class UserSerializerTest(TestCase):
     def test_valid_data(self):
         data = {
             'username': 'test-user',
+            'email': 'a@a.com',
             'password1': '23tf123g@f',
             'password2': '23tf123g@f',
         }
-
         self.assertTrue(UserSerializer(data=data).is_valid())
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=PASSWORD_VALIDATORS)
     def test_invalid_password(self):
         data = {
             'username': 'test-user',
+            'email': 'a@a.com',
             'password1': '23tf',
             'password2': '23tf',
         }
@@ -44,6 +45,7 @@ class UserSerializerTest(TestCase):
     def test_password_mismatch(self):
         data = {
             'username': 'test-user',
+            'email': 'a@a.com',
             'password1': '23tf123g@f',
             'password2': '23tf123g@',
         }
