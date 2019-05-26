@@ -118,11 +118,18 @@ class LoginSerializer(serializers.Serializer):
                 code='invalid_login',
             )
 
-        self._confirm_login_allowed(self.user)
+        self.confirm_login_allowed(self.user)
 
         return data
 
-    def _confirm_login_allowed(self, user):
+    def confirm_login_allowed(self, user):
+        """Override this method if you use custom authentication method
+        and have additional methods for allowing logins.
+        """
+
+        # XXX NOTE This condition doesn't have any effects
+        # if you use `django.contrib.auth.backends.ModelBackend`
+        # It's useful just for custom backends
         if not user.is_active:
             raise serializers.ValidationError(
                 self.error_messages['inactive'],
