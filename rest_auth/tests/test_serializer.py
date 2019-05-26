@@ -16,14 +16,36 @@ class UserSerializerTest(TestCase):
         ),
     }]
 
-    def test_valid_data(self):
+    def test_create_user(self):
         data = {
             'username': 'test-user',
             'email': 'a@a.com',
             'password1': '23tf123g@f',
             'password2': '23tf123g@f',
         }
-        self.assertTrue(UserSerializer(data=data).is_valid())
+
+        serializer = UserSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        user = serializer.save()
+        self.assertIsNotNone(user)
+        # UserSerializer should not save raw password
+        self.assertNotEqual(user.password, data['password1'])
+
+    def test_required_fields(self):
+        data = {
+            'username': '',
+            'email': '',
+            'password1': '',
+            'password2': '',
+        }
+
+        serializer = UserSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertItemsEqual(
+            serializer.errors.keys(),
+            ('username', 'email', 'password1', 'password2')
+        )
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=PASSWORD_VALIDATORS)
     def test_invalid_password(self):

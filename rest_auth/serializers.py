@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model, password_validation
@@ -60,21 +61,24 @@ class UserSerializer(serializers.ModelSerializer):
 
         return password2
 
-    def create(self, validated_data):
-        user = UserModel._default_manager.create_user(
-            validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password1'],
-            is_active=True,
-        )
+    def save(self, **kwargs):
+        password = self.validated_data.pop('password1')
+        self.validated_data.pop('password2')
+
+        # NOTE Because ModelSerializer.save calls model._default_manager.save()
+        # , we should set user's password manually.
+        user = super(UserSerializer, self).save(**kwargs)
+        user.set_password(password)
 
         # TODO: user activation through email confirmation.
         require_email_confirmation = getattr(
-            settings, 'SIGNUP_REQUIRE_EMAIL_CONFIRMATION', False
+            settings, 'REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION', False
         )
 
         if require_email_confirmation:
             user.is_active = False
+
+        user.save()
 
         return user
 
