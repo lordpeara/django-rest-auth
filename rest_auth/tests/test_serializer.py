@@ -2,13 +2,15 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth import get_user_model
+from django.core.mail.backends.dummy import EmailBackend
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
 from rest_framework.settings import api_settings
 
 from rest_auth.serializers import (
-    LoginSerializer, UserSerializer,
+    LoginSerializer, PasswordResetSerializer, UserSerializer,
 )
 
 
@@ -98,6 +100,7 @@ class _TestModelBackend(object):
 
 class LoginSerializerTest(TestCase):
     UserModel = get_user_model()
+    CUSTOM_BACKEND = ('rest_auth.tests.test_serializer._TestModelBackend',)
 
     def setUp(self):
         self.user = self.UserModel._default_manager.create_user(
@@ -115,11 +118,7 @@ class LoginSerializerTest(TestCase):
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.get_user().pk, self.user.pk)
 
-    @override_settings(
-        AUTHENTICATION_BACKENDS=(
-            'rest_auth.tests.test_serializer._TestModelBackend',
-        )
-    )
+    @override_settings(AUTHENTICATION_BACKENDS=CUSTOM_BACKEND)
     def test_inactive_user_for_custom_modelbackend(self):
         self.user.is_active = False
         self.user.save()
@@ -137,3 +136,59 @@ class LoginSerializerTest(TestCase):
             serializer.errors[api_settings.NON_FIELD_ERRORS_KEY],
             (serializer.error_messages['inactive'], )
         )
+
+
+class _TestEmailBackend(EmailBackend):
+    email_buffer = []
+
+    def send_messages(self, messages):
+        self.email_buffer.extend(list(messages))
+        return super(_TestEmailBackend, self).send_messages(messages)
+
+
+class PasswordResetSerializerTest(TestCase):
+    UserModel = get_user_model()
+    TEST_EMAIL_BACKEND = 'rest_auth.tests.test_serializer._TestEmailBackend'
+
+    def setUp(self):
+        self.UserModel._default_manager.create_user(
+            username='test-user', password='test-password',
+            email='test@test.com',
+        )
+
+    @override_settings(EMAIL_BACKEND=TEST_EMAIL_BACKEND)
+    def test_valid_data(self):
+        data = {
+            'email': 'test@test.com',
+        }
+
+        serializer = PasswordResetSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        # serializer.save should send email.
+        request = RequestFactory().get('/')
+        serializer.save(request=request)
+        self.assertEqual(len(_TestEmailBackend.email_buffer), 1)
+
+        # check email message
+        msg = _TestEmailBackend.email_buffer.pop()
+        self.assertItemsEqual(msg.to, (data['email'],))
+
+    @override_settings(EMAIL_BACKEND=TEST_EMAIL_BACKEND)
+    def test_non_existing_user(self):
+        data = {
+            'email': 'a@a.com',
+        }
+
+        serializer = PasswordResetSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        # Email should not be sent.
+        request = RequestFactory().get('/')
+        serializer.save(request=request)
+        self.assertEqual(len(_TestEmailBackend.email_buffer), 0)
+
+    def test_invalid_data(self):
+        serializer = PasswordResetSerializer(data={})
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(serializer.errors['email'][0].code, 'required')

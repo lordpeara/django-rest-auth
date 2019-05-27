@@ -124,7 +124,7 @@ class LoginSerializer(serializers.Serializer):
 
     def confirm_login_allowed(self, user):
         """Override this method if you use custom authentication method
-        and have additional methods for allowing logins.
+        and have additional methods for allowing login.
         """
 
         # XXX NOTE This condition doesn't have any effects
