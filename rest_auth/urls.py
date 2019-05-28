@@ -23,5 +23,5 @@ urlpatterns = [
 
     url(r'^change-password/$',
         PasswordChangeView.as_view(),
-        name='change_password'),
+        name='password_change'),
 ]
