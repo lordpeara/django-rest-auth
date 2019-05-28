@@ -119,7 +119,7 @@ class PasswordChangeMixin(object):
     serializer_class = PasswordChangeSerializer
 
     def reset(self, request, *args, **kwargs):
-        serializer = self.get_serializer(user=request.user, data=request.data)
+        serializer = self.get_serializer(request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response.Response(None)

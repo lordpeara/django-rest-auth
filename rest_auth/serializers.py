@@ -186,7 +186,7 @@ class SetPasswordSerializer(serializers.Serializer):
         'password_mismatch': _('2 passwords should be equal'),
     }
 
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         self.user = user
         super(SetPasswordSerializer, self).__init__(*args, **kwargs)
 

@@ -207,7 +207,7 @@ class PasswordChangeSerializerTest(TestCase):
             'new_password2': 'new-password',
         }
 
-        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        serializer = PasswordChangeSerializer(self.user, data=data)
         self.assertTrue(serializer.is_valid())
 
         serializer.save()
@@ -220,7 +220,7 @@ class PasswordChangeSerializerTest(TestCase):
             'new_password2': 'new-password',
         }
 
-        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        serializer = PasswordChangeSerializer(self.user, data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('old_password', serializer.errors)
         self.assertEqual(serializer.errors['old_password'][0].code,
@@ -233,7 +233,7 @@ class PasswordChangeSerializerTest(TestCase):
             'new_password2': 'new-password2',
         }
 
-        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        serializer = PasswordChangeSerializer(self.user, data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
         self.assertEqual(
