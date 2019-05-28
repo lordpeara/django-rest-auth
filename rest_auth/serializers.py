@@ -61,13 +61,13 @@ class UserSerializer(serializers.ModelSerializer):
 
         return password2
 
-    def save(self, **kwargs):
-        password = self.validated_data.pop('password1')
-        self.validated_data.pop('password2')
+    def create(self, validated_data):
+        password = validated_data.pop('password1')
+        validated_data.pop('password2')
 
-        # NOTE Because ModelSerializer.save calls model._default_manager.save()
-        # , we should set user's password manually.
-        user = super(UserSerializer, self).save(**kwargs)
+        # NOTE We should set user's password manually because
+        # ModelSerializer.create calls model._default_manager.save().
+        user = super(UserSerializer, self).create(validated_data)
         user.set_password(password)
 
         # TODO: user activation through email confirmation.
@@ -208,11 +208,10 @@ class SetPasswordSerializer(serializers.Serializer):
 
         return password2
 
-    def save(self, commit=True):
-        password = self.validated_data['new_password1']
+    def create(self, validated_data):
+        password = validated_data['new_password1']
         self.user.set_password(password)
-        if commit:
-            self.user.save()
+        self.user.save()
 
         return self.user
 
