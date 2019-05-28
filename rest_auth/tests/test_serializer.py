@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from mock import patch
+
+from django import forms
 from django.contrib.auth import get_user_model
 from django.core.mail.backends.dummy import EmailBackend
 from django.test import TestCase
@@ -91,12 +94,7 @@ class UserSerializerTest(TestCase):
 
 class _TestModelBackend(object):
     def authenticate(self, request, **credentials):
-        try:
-            user = UserModel.objects.get(username=credentials['username'])
-        except UserModel.DoesNotExist:
-            user = None
-
-        return user
+        return UserModel.objects.get(username=credentials['username'])
 
 
 class LoginSerializerTest(TestCase):
@@ -117,6 +115,20 @@ class LoginSerializerTest(TestCase):
         serializer = LoginSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.get_user().pk, self.user.pk)
+
+    def test_incorrect_password(self):
+        data = {
+            'username': 'test-user',
+            'password': 'bad-password',
+        }
+
+        serializer = LoginSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
+        self.assertEqual(
+            serializer.errors[api_settings.NON_FIELD_ERRORS_KEY][0].code,
+            'invalid_login',
+        )
 
     @override_settings(AUTHENTICATION_BACKENDS=CUSTOM_BACKEND)
     def test_inactive_user_for_custom_modelbackend(self):
@@ -173,6 +185,18 @@ class PasswordResetSerializerTest(TestCase):
         msg = _TestEmailBackend.email_buffer.pop()
         self.assertItemsEqual(msg.to, (data['email'],))
 
+    @patch('django.forms.fields.EmailField.clean')
+    def test_invalid_email(self, mock):
+        data = {
+            'email': 'test@test.com',
+        }
+
+        mock.side_effect = forms.ValidationError('intended side effect')
+
+        serializer = PasswordResetSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('email', serializer.errors)
+
     @override_settings(EMAIL_BACKEND=TEST_EMAIL_BACKEND)
     def test_non_existing_user(self):
         data = {
@@ -213,7 +237,7 @@ class PasswordChangeSerializerTest(TestCase):
         serializer.save()
         self.assertTrue(self.user.check_password(data['new_password1']))
 
-    def test_invalid_old_password(self):
+    def test_incorrect_old_password(self):
         data = {
             'old_password': 'password',
             'new_password1': 'new-password',
