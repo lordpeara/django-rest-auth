@@ -108,8 +108,7 @@ class LoginSerializer(serializers.Serializer):
         self.user = auth.authenticate(username=username, password=password)
         if self.user is None:
             raise serializers.ValidationError(
-                self.error_messages['invalid_login'],
-                code='invalid_login',
+                self.error_messages['invalid_login'], code='invalid_login',
             )
 
         self.confirm_login_allowed(self.user)
@@ -126,8 +125,7 @@ class LoginSerializer(serializers.Serializer):
         # It's useful just for custom backends
         if not user.is_active:
             raise serializers.ValidationError(
-                self.error_messages['inactive'],
-                code='inactive',
+                self.error_messages['inactive'], code='inactive',
             )
 
     def get_user(self):
