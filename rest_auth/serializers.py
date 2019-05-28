@@ -101,12 +101,6 @@ class LoginSerializer(serializers.Serializer):
         'inactive': _('This account is inactive.'),
     }
 
-    def __init__(self, request=None, *args, **kwargs):
-        self.request = request
-        self.user = None
-
-        super(LoginSerializer, self).__init__(request, *args, **kwargs)
-
     def validate(self, data):
         username = data['username']
         password = data['password']
