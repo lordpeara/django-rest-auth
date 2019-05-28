@@ -10,8 +10,11 @@ from django.test.utils import override_settings
 from rest_framework.settings import api_settings
 
 from rest_auth.serializers import (
-    LoginSerializer, PasswordResetSerializer, UserSerializer,
+    LoginSerializer, PasswordChangeSerializer, PasswordResetSerializer,
+    UserSerializer,
 )
+
+UserModel = get_user_model()
 
 
 class UserSerializerTest(TestCase):
@@ -87,23 +90,20 @@ class UserSerializerTest(TestCase):
 
 
 class _TestModelBackend(object):
-    UserModel = get_user_model()
-
     def authenticate(self, request, **credentials):
         try:
-            user = self.UserModel.objects.get(username=credentials['username'])
-        except self.UserModel.DoesNotExist:
+            user = UserModel.objects.get(username=credentials['username'])
+        except UserModel.DoesNotExist:
             user = None
 
         return user
 
 
 class LoginSerializerTest(TestCase):
-    UserModel = get_user_model()
     CUSTOM_BACKEND = ('rest_auth.tests.test_serializer._TestModelBackend',)
 
     def setUp(self):
-        self.user = self.UserModel._default_manager.create_user(
+        self.user = UserModel._default_manager.create_user(
             username='test-user', email='test@test.com',
             password='test-password',
         )
@@ -147,11 +147,10 @@ class _TestEmailBackend(EmailBackend):
 
 
 class PasswordResetSerializerTest(TestCase):
-    UserModel = get_user_model()
     TEST_EMAIL_BACKEND = 'rest_auth.tests.test_serializer._TestEmailBackend'
 
     def setUp(self):
-        self.UserModel._default_manager.create_user(
+        UserModel._default_manager.create_user(
             username='test-user', password='test-password',
             email='test@test.com',
         )
@@ -192,3 +191,52 @@ class PasswordResetSerializerTest(TestCase):
         serializer = PasswordResetSerializer(data={})
         self.assertFalse(serializer.is_valid())
         self.assertEqual(serializer.errors['email'][0].code, 'required')
+
+
+class PasswordChangeSerializerTest(TestCase):
+    def setUp(self):
+        self.user = UserModel._default_manager.create_user(
+            username='test-user', email='root@dev.null',
+            password='test-password',
+        )
+
+    def test_valid_data(self):
+        data = {
+            'old_password': 'test-password',
+            'new_password1': 'new-password',
+            'new_password2': 'new-password',
+        }
+
+        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        self.assertTrue(serializer.is_valid())
+
+        serializer.save()
+        self.assertTrue(self.user.check_password(data['new_password1']))
+
+    def test_invalid_old_password(self):
+        data = {
+            'old_password': 'password',
+            'new_password1': 'new-password',
+            'new_password2': 'new-password',
+        }
+
+        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('old_password', serializer.errors)
+        self.assertEqual(serializer.errors['old_password'][0].code,
+                         'password_incorrect')
+
+    def test_password_mismatch(self):
+        data = {
+            'old_password': 'test-password',
+            'new_password1': 'new-password1',
+            'new_password2': 'new-password2',
+        }
+
+        serializer = PasswordChangeSerializer(user=self.user, data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
+        self.assertEqual(
+            serializer.errors[api_settings.NON_FIELD_ERRORS_KEY][0].code,
+            'password_mismatch'
+        )
