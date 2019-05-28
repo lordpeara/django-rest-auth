@@ -79,7 +79,7 @@ class PasswordForgotMixin(object):
         serializer.is_valid(raise_exception=True)
 
         email_opts = self.get_email_opts(request=request)
-        self.send_mail(serializer, **email_opts)
+        serializer.save(**email_opts)
 
         return response.Response(None, status=status.HTTP_200_OK)
 
@@ -89,9 +89,6 @@ class PasswordForgotMixin(object):
         email_opts.update(opts)
 
         return email_opts
-
-    def send_mail(self, serializer, **opts):
-        serializer.save(**opts)
 
 
 class PasswordForgotView(PasswordForgotMixin, generics.GenericAPIView):
