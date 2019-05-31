@@ -34,13 +34,15 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
     def login(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         self.perform_login(request, serializer.get_user())
 
         data = self.get_response_data(serializer.data)
         headers = self.get_success_headers(serializer.data)
 
-        return response.Response(data, status=status.HTTP_200_OK,
-                                 headers=headers)
+        return response.Response(
+            data, status=status.HTTP_200_OK, headers=headers,
+        )
 
     def perform_login(self, request, user):
         auth_login(request, user)
