@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-rest-framework-auth',
-    version='0.0.1',
+    version='0.0.1a',
     packages=find_packages(exclude=['*.tests']),
     scripts=[],
 
