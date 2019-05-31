@@ -30,6 +30,12 @@ class LogoutViewTest(TestCase):
         )
         self.client.login(username='user', password='pass')
 
+    def test_permission(self):
+        # anonymous user cannot access to logout
+        self.client.logout()
+        response = self.client.post(r('logout'))
+        self.assertEqual(response.status_code, 403)
+
     def test_logout(self):
         response = self.client.post(r('logout'))
         self.assertEqual(response.status_code, 200)
@@ -55,6 +61,11 @@ class PasswordChangeViewTest(TestCase):
             username='user', password='pass', email='user@localhost',
         )
         self.client.login(username='user', password='pass')
+
+    def test_permission(self):
+        self.client.logout()
+        response = self.client.post(r('password_change'))
+        self.assertEqual(response.status_code, 403)
 
     def test_user_bound_serializer(self):
         # undefined method calls should initialize serializer normally.
