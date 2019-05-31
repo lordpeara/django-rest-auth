@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import functools
+
 from django.conf import settings
 from django.contrib.auth import (
     login as auth_login,
@@ -117,8 +119,14 @@ class PasswordResetDoneView(PasswordResetCompleteView):
 class PasswordChangeMixin(object):
     serializer_class = PasswordChangeSerializer
 
+    def get_serializer_class(self):
+        # HACK `PasswordChangeSerializer` requires `user` as a first param in
+        # __init__, so we should bind it to that class for all HTTP methods.
+        klass = super(PasswordChangeMixin, self).get_serializer_class()
+        return functools.partial(klass, self.request.user)
+
     def reset(self, request, *args, **kwargs):
-        serializer = self.get_serializer(request.user, data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response.Response(None)

@@ -56,6 +56,11 @@ class PasswordChangeViewTest(TestCase):
         )
         self.client.login(username='user', password='pass')
 
+    def test_user_bound_serializer(self):
+        # undefined method calls should initialize serializer normally.
+        response = self.client.get(r('password_change'))
+        self.assertEqual(response.status_code, 405)
+
     def test_password_change(self):
         response = self.client.post(
             r('password_change'), data={
