@@ -50,9 +50,9 @@ class UserSerializerTest(TestCase):
 
         serializer = UserSerializer(data=data)
         self.assertFalse(serializer.is_valid())
-        self.assertItemsEqual(
-            serializer.errors.keys(),
-            ('username', 'email', 'password1', 'password2')
+        self.assertSetEqual(
+            set(serializer.errors.keys()),
+            set(['username', 'email', 'password1', 'password2'])
         )
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=PASSWORD_VALIDATORS)
@@ -141,9 +141,9 @@ class LoginSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
 
-        self.assertItemsEqual(
-            serializer.errors[api_settings.NON_FIELD_ERRORS_KEY],
-            (serializer.error_messages['inactive'], )
+        self.assertSetEqual(
+            set(serializer.errors[api_settings.NON_FIELD_ERRORS_KEY]),
+            set([serializer.error_messages['inactive']])
         )
 
 
@@ -180,7 +180,7 @@ class PasswordResetSerializerTest(TestCase):
 
         # check email message
         msg = _TestEmailBackend.email_buffer.pop()
-        self.assertItemsEqual(msg.to, (data['email'],))
+        self.assertSetEqual(set(msg.to), set([data['email']]))
 
     @patch('django.forms.fields.EmailField.clean')
     def test_invalid_email(self, mock):
