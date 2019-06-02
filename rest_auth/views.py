@@ -13,7 +13,6 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     SuccessURLAllowedHostsMixin,
 )
-
 from rest_framework import (
     generics, permissions, response, status, views,
 )

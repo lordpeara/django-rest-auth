@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import serializers
 
 UserModel = get_user_model()
