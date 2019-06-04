@@ -8,13 +8,9 @@ setup(
     scripts=[],
 
     install_requires=[
-        'Django<2.0.0,>=1.4.22',
-        'djangorestframework==3.9.2',
-        # 'six>=1.9.0',
+        'Django<2.2,>=1.11.21',
+        'djangorestframework>=3.7',
     ],
-
-    tests_require=[],
-    test_suite='',
 
     author='Eugene Choonghwi Lee',
     author_email='lordpeara@gmail.com',
