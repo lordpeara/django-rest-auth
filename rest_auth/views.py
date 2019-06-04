@@ -13,10 +13,12 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     SuccessURLAllowedHostsMixin,
 )
+from django.utils.decorators import method_decorator
 from rest_framework import (
     generics, permissions, response, status, views,
 )
 
+from .contrib.rest_framework.decorators import sensitive_post_parameters
 from .serializers import (
     LoginSerializer,
     PasswordChangeSerializer,
@@ -60,6 +62,7 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
 class LoginView(LoginMixin, generics.GenericAPIView):
     """LoginView for REST-API.
     """
+    @method_decorator(sensitive_post_parameters())
     def post(self, request, *args, **kwargs):
         return self.login(request, *args, **kwargs)
 
@@ -136,5 +139,6 @@ class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):
     """
     permission_classes = (permissions.IsAuthenticated, )
 
+    @method_decorator(sensitive_post_parameters())
     def post(self, request, *args, **kwargs):
         return self.reset(request, *args, **kwargs)
