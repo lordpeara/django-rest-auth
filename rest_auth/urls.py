@@ -34,6 +34,8 @@ api_root = OrderedDict()
 for pattern in urlpatterns:
     api_root[pattern.name] = pattern.name
 
+
 urlpatterns += [
-    url(r'^', APIRootView.as_view(api_root_dict=api_root), name='api-root')
+    url(r'^api-root/$',
+        APIRootView.as_view(api_root_dict=api_root), name='api-root')
 ]
