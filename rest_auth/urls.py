@@ -1,4 +1,7 @@
+from collections import OrderedDict
+
 from django.conf.urls import url
+from rest_framework.routers import APIRootView
 
 from .views import (
     LoginView, LogoutView,
@@ -24,4 +27,13 @@ urlpatterns = [
     url(r'^change-password/$',
         PasswordChangeView.as_view(),
         name='password_change'),
+]
+
+
+api_root = OrderedDict()
+for pattern in urlpatterns:
+    api_root[pattern.name] = pattern.name
+
+urlpatterns += [
+    url(r'^', APIRootView.as_view(api_root_dict=api_root), name='api-root')
 ]
