@@ -12,10 +12,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-import rest_auth
 
 
 # -- Project information -----------------------------------------------------
@@ -25,9 +24,9 @@ copyright = u'2019, lordpeara'
 author = u'lordpeara'
 
 # The short X.Y version
-version = rest_auth.__version__
+version = os.environ.get('APP_VERSION', '')
 # The full version, including alpha/beta/rc tags
-release = rest_auth.__version__
+release = os.environ.get('APP_VERSION', '')
 
 
 # -- General configuration ---------------------------------------------------
