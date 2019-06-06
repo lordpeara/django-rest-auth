@@ -20,8 +20,8 @@
 # -- Project information -----------------------------------------------------
 
 project = u'django-rest-auth'
-copyright = u'2019, Eugene Choonghwi Lee'
-author = u'eugene'
+copyright = u'2019, lordpeara'
+author = u'lordpeara'
 
 # The short X.Y version
 version = u''
@@ -131,7 +131,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'django-rest-auth.tex', u'django-rest-auth Documentation',
-     u'eugene', 'manual'),
+     u'lordpeara', 'manual'),
 ]
 
 

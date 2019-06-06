@@ -12,7 +12,7 @@ setup(
         'djangorestframework>=3.7',
     ],
 
-    author='Eugene Choonghwi Lee',
+    author='lordpeara',
     author_email='lordpeara@gmail.com',
     description='django authentication meets rest framework',
     license='MIT',
