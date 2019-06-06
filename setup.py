@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
+import rest_auth
 
 
 setup(
     name='django-rest-framework-auth',
-    version='0.1.0dev',
+    version=rest_auth.__version__,
     packages=find_packages(exclude=['*.tests']),
     scripts=[],
 

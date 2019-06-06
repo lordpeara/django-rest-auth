@@ -15,6 +15,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import rest_auth
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +25,9 @@ copyright = u'2019, lordpeara'
 author = u'lordpeara'
 
 # The short X.Y version
-version = u''
+version = rest_auth.__version__
 # The full version, including alpha/beta/rc tags
-release = u''
+release = rest_auth.__version__
 
 
 # -- General configuration ---------------------------------------------------
