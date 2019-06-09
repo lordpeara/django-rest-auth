@@ -18,11 +18,20 @@ Just install it, including urls and see APIs from your browsable API.
 
 .. code-block:: bash
 
-    $ pip install rest-framework-auth
+    $ pip install django-rest-framework-auth
     $ django-admin startproject proj
     $ vi proj/proj/settings.py
 
 .. code-block:: python
+
+    # settings.py
+    # ...
+    INSTALLED_APPS = (
+        # ...
+        'rest_auth',
+        'rest_framework',
+        # ...
+    )
 
     # urls.py
     # ...
@@ -41,4 +50,6 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+
+   Installation <install>

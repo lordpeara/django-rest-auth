@@ -13,8 +13,14 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import sys
+
+import django
+
+
+sys.path.insert(0, os.path.abspath('..'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rest_auth.tests.settings')
+django.setup()
 
 
 # -- Project information -----------------------------------------------------
