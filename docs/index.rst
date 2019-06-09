@@ -53,3 +53,4 @@ Contents
    :maxdepth: 1
 
    Installation <install>
+   API References <api/index>
