@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""Serializer implementations for authentication.
+"""
+
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model, password_validation
@@ -11,6 +14,23 @@ UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """User serializer for rest_framework & AUTH_USER_MODEL.
+
+    Fields & methods are built on a django's defualt ``User`` model.
+    Extend this serializer if you need your custom user model.
+
+    (Even if ``AUTH_USER_MODEL`` is can be customized, this is recommended
+    that You don't change & use customized user model.
+    using custom user model is very complex.)
+
+    :param username: ``USERNAME_FIELD`` of ``AUTH_USER_MODEL``
+    :param email: ``User.get_email_field_name()``
+    :param password1: password of a user\
+    (write_only, used only when created)
+    :param password2: password confirmation (write_only)
+
+    :TODO: Serializer Only implements creating. list/get are need to be implmtd
+    """
     password1 = serializers.CharField(
         label=_('Password'),
         validators=[password_validation.validate_password],
@@ -44,6 +64,9 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
+        """Vaildates if two passwords are equal.
+        :exception ValidationError: when 2 passwds are different
+        """
         password1 = data.get('password1')
         password2 = data.get('password2')
 
@@ -61,6 +84,15 @@ class UserSerializer(serializers.ModelSerializer):
         return password2
 
     def create(self, validated_data):
+        """Creates user instance
+
+        :param validated_data: validated data created after ``self.vaildate``
+
+        :CAVEAT:
+        A clear difference between django's ``ModelForm`` and rest_framework's
+        ``ModelSerializer`` is that, model serializer's ``save`` method doesn't
+        respect form's ``commit=True``.
+        """
         password = validated_data.pop('password1')
         validated_data.pop('password2')
 
@@ -83,6 +115,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
+    """Serializer for loggin in.
+    It checks username and password are correct for settings.AUTH_USER_MODEL.
+
+    After validating it, ``user`` instance created for authenticated user.
+    View methods should persist this user.
+    (through ``django.contrib.auth.login``)
+
+    :param username: ``USERNAME_FIELD`` for AUTH_USER_MODEL
+    :param password:
+    :TODO: It fits only ModelBackend of django. need to take\
+    other authentication backends.
+    """
     username = serializers.CharField(
         label=_('Username'), max_length=254,
     )
@@ -101,6 +145,13 @@ class LoginSerializer(serializers.Serializer):
     }
 
     def validate(self, data):
+        """Checks username & password.
+        uses ``django.contrib.auth.authenticate``
+
+        :param data: validated data from ``Serializer.validate``
+        :return: validated_data
+        :exception VaildationError: if username or password are incorrect
+        """
         username = data['username']
         password = data['password']
 
@@ -115,8 +166,12 @@ class LoginSerializer(serializers.Serializer):
         return data
 
     def confirm_login_allowed(self, user):
-        """Override this method if you use custom authentication method
+        """Checks if validated user is allowed for website.
+
+        Override this method if you use custom authentication method
         and have additional methods for allowing login.
+
+        :exception VaildationError: if user are not allowed
         """
 
         # XXX NOTE This condition doesn't have any effects
@@ -128,10 +183,20 @@ class LoginSerializer(serializers.Serializer):
             )
 
     def get_user(self):
+        """
+        :return: ``user`` instance created after ``self.validate``
+        """
         return self.user
 
 
 class PasswordResetSerializer(serializers.Serializer):
+    """Sends a website link for resetting password.
+    It uses django's ``PasswordResetForm`` directly because
+    there is just one required field, `email`, and form implemented
+    its business logic nicely.
+
+    :param email: email address to receive password-reset-link.
+    """
     email = serializers.EmailField(
         label=_('Email'), max_length=254,
     )
@@ -139,6 +204,10 @@ class PasswordResetSerializer(serializers.Serializer):
     password_reset_form_class = PasswordResetForm
 
     def validate_email(self, value):
+        """
+        :exception VaildationError: ``rest_framework``'s field validation
+        :exception VaildationError: ``django``'s field vaildation
+        """
         self.form = self.password_reset_form_class(data=self.initial_data)
         if not self.form.is_valid():
             if 'email' in self.form.errors:
@@ -154,6 +223,8 @@ class PasswordResetSerializer(serializers.Serializer):
              use_https=True, token_generator=default_token_generator,
              from_email=None, request=None, html_email_template_name=None,
              extra_email_context=None):
+        """sends a email, which contains link for resetting password
+        """
 
         return self.form.save(
             domain_override=domain_override,
@@ -166,6 +237,15 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 class SetPasswordSerializer(serializers.Serializer):
+    """This serializer resets password of a given user.
+    Please be VERY CAREFUL for using this any given user's password
+    can be changed.
+
+    Setting permission IsAdminUser is recommended.
+
+    :param new_password1: new password
+    :param new_password2: new password confirmation.
+    """
     new_password1 = serializers.CharField(
         label=_('New password'),
         validators=[password_validation.validate_password],
@@ -190,6 +270,9 @@ class SetPasswordSerializer(serializers.Serializer):
         super(SetPasswordSerializer, self).__init__(*args, **kwargs)
 
     def validate(self, data):
+        """
+        :exception VaildationError: if two given passwords are different.
+        """
         password1 = data.get('new_password1')
         password2 = data.get('new_password2')
 
@@ -208,6 +291,8 @@ class SetPasswordSerializer(serializers.Serializer):
         return password2
 
     def create(self, validated_data):
+        """resets password
+        """
         password = validated_data['new_password1']
         self.user.set_password(password)
         self.user.save()
@@ -216,6 +301,14 @@ class SetPasswordSerializer(serializers.Serializer):
 
 
 class PasswordChangeSerializer(SetPasswordSerializer):
+    """resets password of user.
+    Resetting password is done if old_password is correct and
+    two new passwords are equals.
+
+    :param old_password: old_password
+    :param new_password1: new password
+    :param new_password2: new password confirmation.
+    """
     old_password = serializers.CharField(
         label=_('Old password'),
         write_only=True,
@@ -228,6 +321,9 @@ class PasswordChangeSerializer(SetPasswordSerializer):
     }
 
     def validate_old_password(self, old_password):
+        """
+        :exception ValidationError: if old_password is not correct
+        """
         if not self.user.check_password(old_password):
             raise serializers.ValidationError(
                 self.error_messages['password_incorrect'],
