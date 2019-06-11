@@ -86,12 +86,21 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Creates user instance
 
-        :param validated_data: validated data created after ``self.vaildate``
+        CAVEAT:
 
-        :CAVEAT:
         A clear difference between django's ``ModelForm`` and rest_framework's
         ``ModelSerializer`` is that, model serializer's ``save`` method doesn't
         respect form's ``commit=True``.
+
+        Inside ``super().create``, a query is fired to create user,
+        and inside this, additional query is fired to save hashed password.
+        It's because ``ModelSerializer``'s ``create`` method uses
+        default manager's create function, ``Model._default_manager.create()``
+
+        (User model creation is recommended by calling ``UserManager``'s
+        ``create_user`` method)
+
+        :param validated_data: validated data created after ``self.vaildate``
         """
         password = validated_data.pop('password1')
         validated_data.pop('password2')

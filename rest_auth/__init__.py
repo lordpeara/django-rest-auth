@@ -10,7 +10,7 @@ django-rest-framework's `Serializer` is nice idea for detaching
 business logic from view functions. It's very similar to django's
 ``Form``, but serializer is not obligible for rendering response data,
 and should not. - django forms also do this, seriously!!!
-some expert beginners just know form is ONLY FOR `html form rendering`. :(
+some expert beginners just know form is ONLY FOR `html form rendering` :(
 
 Unluckily, even though django already provides forms and views
 for authentication, We cannot use these for REST-APIs. It uses forms!!
