@@ -25,8 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     :param username: ``USERNAME_FIELD`` of ``AUTH_USER_MODEL``
     :param email: ``User.get_email_field_name()``
-    :param password1: password of a user\
-    (write_only, used only when created)
+    :param password1: password of a user (write_only, used only when created)
     :param password2: password confirmation (write_only)
 
     :TODO: Serializer Only implements creating. list/get are need to be implmtd
@@ -65,6 +64,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Vaildates if two passwords are equal.
+
         :exception ValidationError: when 2 passwds are different
         """
         password1 = data.get('password1')
@@ -132,7 +132,8 @@ class LoginSerializer(serializers.Serializer):
     (through ``django.contrib.auth.login``)
 
     :param username: ``USERNAME_FIELD`` for AUTH_USER_MODEL
-    :param password:
+    :param password: user's password
+
     :TODO: It fits only ModelBackend of django. need to take\
     other authentication backends.
     """

@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""Views for authentication
+
+In this views, authentication views are composited with GenericAPIView
+(of rest_framework) and mixins, which is implemented for process views.
+
+Because, we didn't know what methods you use for process business logics.
+You can construct your own views by extending our mixins.
+
+(rest_framework's generic views used this strategy)
+"""
+
 from __future__ import unicode_literals
 
 import functools
@@ -32,9 +43,18 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
     # TODO return 302 if needed.
     # redirect_url = False
     response_includes_data = False
+    """Set this to ``True`` if you wanna send user data (or more)
+    when authentication is successful. (default: ``False``)
+    """
+
     serializer_class = LoginSerializer
 
     def login(self, request, *args, **kwargs):
+        """Main business logic for loggin in
+
+        :exception ValidationError: auth failed, but it will be handled\
+        by rest_frameworks error handler.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -48,12 +68,17 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         )
 
     def perform_login(self, request, user):
+        """Persist a user. Override this method if you do more than
+        persisting user.
+        """
         auth_login(request, user)
 
     def get_response_data(self, data):
+        """Override this method when you use ``response_includes_data`` and
+        You wanna send customized user data (beyond serializer.data)
+        """
         if self.response_includes_data:
             return data
-        return None
 
     def get_success_headers(self, data):
         return {}
@@ -64,6 +89,8 @@ class LoginView(LoginMixin, generics.GenericAPIView):
     """
     @method_decorator(sensitive_post_parameters())
     def post(self, request, *args, **kwargs):
+        """Just calls ``LoginMixin.login``
+        """
         return self.login(request, *args, **kwargs)
 
 
@@ -73,14 +100,22 @@ class LogoutView(views.APIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
+        """Logout a user. performed by ``django.contrib.auth.logout``
+
+        No data is to sent.
+        """
         auth_logout(request)
         return response.Response(None, status=status.HTTP_200_OK)
 
 
 class PasswordForgotMixin(object):
+    """View for sending password-reset-link.
+    """
     serializer_class = PasswordResetSerializer
 
     def forgot(self, request, *args, **kwargs):
+        """Sends a password-reset-link to requested email.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -90,6 +125,8 @@ class PasswordForgotMixin(object):
         return response.Response(None, status=status.HTTP_200_OK)
 
     def get_email_opts(self, **opts):
+        """Override this method to add more options for sending emails.
+        """
         email_opts = {}
         email_opts.update(getattr(settings, 'REST_AUTH_EMAIL_OPTIONS', {}))
         email_opts.update(opts)
@@ -102,6 +139,8 @@ class PasswordForgotView(PasswordForgotMixin, generics.GenericAPIView):
     """
 
     def post(self, request, *args, **kwargs):
+        """
+        """
         return self.forgot(request, *args, **kwargs)
 
 
@@ -119,6 +158,8 @@ class PasswordResetDoneView(PasswordResetCompleteView):
 
 
 class PasswordChangeMixin(object):
+    """Change password for a user.
+    """
     serializer_class = PasswordChangeSerializer
 
     def get_serializer_class(self):
@@ -128,6 +169,9 @@ class PasswordChangeMixin(object):
         return functools.partial(klass, self.request.user)
 
     def reset(self, request, *args, **kwargs):
+        """Reset password.
+        No data is to sent.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -135,10 +179,12 @@ class PasswordChangeMixin(object):
 
 
 class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):
-    """password change REST-API view.
+    """View for change password.
     """
     permission_classes = (permissions.IsAuthenticated, )
 
     @method_decorator(sensitive_post_parameters())
     def post(self, request, *args, **kwargs):
+        """
+        """
         return self.reset(request, *args, **kwargs)
