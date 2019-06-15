@@ -10,10 +10,6 @@ UserModel = get_user_model()
 
 
 class LoginViewTest(TestCase):
-    REST_FRAMEWORK = {
-        'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
-    }
-
     def setUp(self):
         self.user = UserModel._default_manager.create_user(
             username='user', password='pass', email='user@localhost',

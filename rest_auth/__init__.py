@@ -67,4 +67,4 @@ Below API endpoints can be re-configured if you write your urls.py
     * see api lists
 """
 
-__version__ = '0.1.1dev0'
+__version__ = '0.8.0'
