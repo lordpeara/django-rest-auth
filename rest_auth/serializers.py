@@ -142,7 +142,7 @@ class LoginSerializer(serializers.Serializer):
     )
 
     password = serializers.CharField(
-        label=_('Password'),
+        label=_('Password'), write_only=True,
         style={'input_type': 'password'},
     )
 

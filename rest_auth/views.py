@@ -77,7 +77,11 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         """Override this method when you use ``response_includes_data`` and
         You wanna send customized user data (beyond serializer.data)
         """
-        if self.response_includes_data:
+        empty = getattr(
+            settings, 'REST_AUTH_LOGIN_EMPTY_RESPONSE', True
+        )
+
+        if not empty:
             return data
 
     def get_success_headers(self, data):

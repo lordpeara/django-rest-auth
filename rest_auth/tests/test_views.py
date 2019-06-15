@@ -3,12 +3,17 @@ from __future__ import unicode_literals
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.urls import reverse as r
 
 UserModel = get_user_model()
 
 
 class LoginViewTest(TestCase):
+    REST_FRAMEWORK = {
+        'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    }
+
     def setUp(self):
         self.user = UserModel._default_manager.create_user(
             username='user', password='pass', email='user@localhost',
@@ -21,6 +26,21 @@ class LoginViewTest(TestCase):
         }
         response = self.client.post(r('login'), data=data)
         self.assertEqual(response.status_code, 200)
+        # response should be empty
+        self.assertFalse(bool(response.content))
+
+    @override_settings(REST_AUTH_LOGIN_EMPTY_RESPONSE=False)
+    def test_login_returns_data(self):
+        data = {
+            'username': 'user',
+            'password': 'pass',
+        }
+        response = self.client.post(r('login'), data=data)
+        self.assertEqual(response.status_code, 200)
+
+        # response should not contain `password`
+        data.pop('password')
+        self.assertEqual(response.json(), data)
 
 
 class LogoutViewTest(TestCase):
