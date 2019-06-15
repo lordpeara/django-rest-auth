@@ -1,0 +1,21 @@
+dist: trusty
+
+matrix:
+  fast_finish: true
+
+language: python
+
+python:
+  - 3.6
+
+install:
+  - pip install -q -r requirements/requirements.txt
+  - pip install -q flake8 coverage codecov
+
+script:
+  - "python -m coverage run python manage.py test"
+  - "python -m coverage xml"
+  - "python -m flake8"
+
+after_success:
+  - "codecov"
