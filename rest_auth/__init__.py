@@ -31,6 +31,7 @@ Below API endpoints can be re-configured if you write your urls.py
 * POST /login/
     * username
     * password
+
     authenticate user and persist him/her to website
 
 * POST /logout/
@@ -41,6 +42,7 @@ Below API endpoints can be re-configured if you write your urls.py
 
 * POST /forgot/
     * email
+
     send a link for resetting password to user
 
 
@@ -48,6 +50,7 @@ Below API endpoints can be re-configured if you write your urls.py
     * uid64, token - automatically generated tokens (when email is sent)
     * new_password
     * new_password (confirm)
+
     reset a password for user
 
 * GET /reset/d/
@@ -57,6 +60,7 @@ Below API endpoints can be re-configured if you write your urls.py
     * old_password
     * new_password
     * new_password (confirm)
+
     change a password for user
 
 * GET /api-root/

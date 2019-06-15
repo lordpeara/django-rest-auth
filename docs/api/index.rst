@@ -9,6 +9,7 @@ Index
 -----
 
 .. toctree::
+    :maxdepth: 1
 
     rest_auth.serializers <serializers>
     rest_auth.views <views>
