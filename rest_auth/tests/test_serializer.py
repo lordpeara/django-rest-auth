@@ -37,8 +37,26 @@ class UserSerializerTest(TestCase):
 
         user = serializer.save()
         self.assertIsNotNone(user)
+        # user is active
+        self.assertTrue(user.is_active)
         # UserSerializer should not save raw password
         self.assertNotEqual(user.password, data['password1'])
+
+    @override_settings(REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION=True)
+    def test_create_user_requires_email_confirmation(self):
+        data = {
+            'username': 'test-user',
+            'email': 'a@a.com',
+            'password1': '23tf123g@f',
+            'password2': '23tf123g@f',
+        }
+
+        serializer = UserSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        user = serializer.save()
+        self.assertFalse(user.is_active)
+        # TODO email sent for user confirmation
 
     def test_required_fields(self):
         data = {
