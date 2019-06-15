@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.apps import AppConfig
+from django import apps
 
 
-class RestAuthConfig(AppConfig):
+class AppConfig(apps.AppConfig):
     name = 'rest_auth'
