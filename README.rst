@@ -1,11 +1,14 @@
 django-rest-framework-auth
 ==========================
 
-.. image:: https://codecov.io/gh/lordpeara/django-rest-framework-auth/branch/master/graph/badge.svg
+.. image:: https://api.travis-ci.com/lordpeara/django-rest-framework-auth.svg?branch=stable
+    :target: https://travis-ci.com/lordpeara/django-rest-framework-auth
+
+.. image:: https://codecov.io/gh/lordpeara/django-rest-framework-auth/branch/stable/graph/badge.svg
     :target: https://codecov.io/gh/lordpeara/django-rest-framework-auth
 
-.. image:: https://api.travis-ci.com/lordpeara/django-rest-framework-auth.svg?branch=master
-    :target: https://travis-ci.com/lordpeara/django-rest-framework-auth
+.. image:: https://readthedocs.org/projects/django-rest-framework-auth/badge/?version=stable
+    :target: https://django-rest-framework-auth.readthedocs.io/en/latest/?badge=latest
 
 
 django-rest-framework-auth is a django & rest_framework application for
