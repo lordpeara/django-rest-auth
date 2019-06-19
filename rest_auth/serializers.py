@@ -111,9 +111,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
 
         # TODO: user activation through email confirmation.
-        require_email_confirmation = getattr(
-            settings, 'REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION', False
-        )
+        require_email_confirmation =\
+            settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
 
         if require_email_confirmation:
             user.is_active = False

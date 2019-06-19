@@ -24,6 +24,7 @@ from django.contrib.auth.views import (
     SuccessURLAllowedHostsMixin,
 )
 from django.utils.decorators import method_decorator
+from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from rest_framework import (
@@ -32,7 +33,6 @@ from rest_framework import (
 
 from .contrib.rest_framework.decorators import sensitive_post_parameters
 from .serializers import (
-    LoginSerializer,
     PasswordChangeSerializer,
     PasswordResetSerializer,
 )
@@ -48,7 +48,11 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
     when authentication is successful. (default: ``False``)
     """
 
-    serializer_class = LoginSerializer
+    def get_serializer_class(self):
+        serializer_class = import_string(
+            settings.REST_AUTH_LOGIN_SERIALIZER_CLASS
+        )
+        return serializer_class
 
     def login(self, request, *args, **kwargs):
         """Main business logic for loggin in
@@ -72,9 +76,7 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         """Override this method when you use ``response_includes_data`` and
         You wanna send customized user data (beyond serializer.data)
         """
-        empty = getattr(
-            settings, 'REST_AUTH_LOGIN_EMPTY_RESPONSE', True
-        )
+        empty = settings.REST_AUTH_LOGIN_EMPTY_RESPONSE
 
         if not empty:
             return data
@@ -129,7 +131,7 @@ class PasswordForgotMixin(object):
         """Override this method to add more options for sending emails.
         """
         email_opts = {}
-        email_opts.update(getattr(settings, 'REST_AUTH_EMAIL_OPTIONS', {}))
+        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
         email_opts.update(opts)
 
         return email_opts
