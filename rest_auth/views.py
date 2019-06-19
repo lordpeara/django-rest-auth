@@ -48,6 +48,14 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
     when authentication is successful. (default: ``False``)
     """
 
+    serializer_class = None
+    """You should make your own serializer class if you cusomize
+    auth backend and this backend are not satisfied by ``LoginSerializer``.
+
+    (accept other than ``username`` and ``password``.
+    (e.g ``RemoteUserBackend``)
+    """
+
     def get_serializer_class(self):
         serializer_class = import_string(
             settings.REST_AUTH_LOGIN_SERIALIZER_CLASS
