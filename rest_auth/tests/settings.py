@@ -16,7 +16,7 @@ DEBUG = True
 SECRET_KEY = '--------------------------------------------------'
 
 INSTALLED_APPS = [
-    'rest_auth.apps.AppConfig',
+    'rest_auth',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',

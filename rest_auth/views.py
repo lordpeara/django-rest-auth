@@ -16,7 +16,6 @@ import functools
 
 from django.conf import settings
 from django.contrib.auth import (
-    login as auth_login,
     logout as auth_logout,
 )
 from django.contrib.auth.views import (
@@ -25,13 +24,15 @@ from django.contrib.auth.views import (
     SuccessURLAllowedHostsMixin,
 )
 from django.utils.decorators import method_decorator
+from django.utils.module_loading import import_string
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from rest_framework import (
     generics, permissions, response, status, views,
 )
 
 from .contrib.rest_framework.decorators import sensitive_post_parameters
 from .serializers import (
-    LoginSerializer,
     PasswordChangeSerializer,
     PasswordResetSerializer,
 )
@@ -47,7 +48,19 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
     when authentication is successful. (default: ``False``)
     """
 
-    serializer_class = LoginSerializer
+    serializer_class = None
+    """You should make your own serializer class if you cusomize
+    auth backend and this backend are not satisfied by ``LoginSerializer``.
+
+    (accept other than ``username`` and ``password``.
+    (e.g ``RemoteUserBackend``)
+    """
+
+    def get_serializer_class(self):
+        serializer_class = import_string(
+            settings.REST_AUTH_LOGIN_SERIALIZER_CLASS
+        )
+        return serializer_class
 
     def login(self, request, *args, **kwargs):
         """Main business logic for loggin in
@@ -58,7 +71,7 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_login(request, serializer.get_user())
+        serializer.save(request=request)
 
         data = self.get_response_data(serializer.data)
         headers = self.get_success_headers(serializer.data)
@@ -67,19 +80,11 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
             data, status=status.HTTP_200_OK, headers=headers,
         )
 
-    def perform_login(self, request, user):
-        """Persist a user. Override this method if you do more than
-        persisting user.
-        """
-        auth_login(request, user)
-
     def get_response_data(self, data):
         """Override this method when you use ``response_includes_data`` and
         You wanna send customized user data (beyond serializer.data)
         """
-        empty = getattr(
-            settings, 'REST_AUTH_LOGIN_EMPTY_RESPONSE', True
-        )
+        empty = settings.REST_AUTH_LOGIN_EMPTY_RESPONSE
 
         if not empty:
             return data
@@ -92,6 +97,8 @@ class LoginView(LoginMixin, generics.GenericAPIView):
     """LoginView for REST-API.
     """
     @method_decorator(sensitive_post_parameters())
+    @method_decorator(csrf_protect)
+    @method_decorator(never_cache)
     def post(self, request, *args, **kwargs):
         """Just calls ``LoginMixin.login``
         """
@@ -132,7 +139,7 @@ class PasswordForgotMixin(object):
         """Override this method to add more options for sending emails.
         """
         email_opts = {}
-        email_opts.update(getattr(settings, 'REST_AUTH_EMAIL_OPTIONS', {}))
+        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
         email_opts.update(opts)
 
         return email_opts
@@ -188,6 +195,8 @@ class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     @method_decorator(sensitive_post_parameters())
+    @method_decorator(csrf_protect)
+    @method_decorator(never_cache)
     def post(self, request, *args, **kwargs):
         """
         """

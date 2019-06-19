@@ -212,6 +212,18 @@ class PasswordResetSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn('email', serializer.errors)
 
+    @patch('django.contrib.auth.forms.PasswordResetForm.clean')
+    def test_form_error(self, mock):
+        data = {
+            'email': 'test@test.com',
+        }
+
+        mock.side_effect = forms.ValidationError('intended side effect')
+
+        serializer = PasswordResetSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('email', serializer.errors)
+
     @override_settings(EMAIL_BACKEND=TEST_EMAIL_BACKEND)
     def test_non_existing_user(self):
         data = {

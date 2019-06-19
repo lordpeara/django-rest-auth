@@ -4,7 +4,7 @@
 
 from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import get_user_model, login, password_validation
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.translation import ugettext_lazy as _
@@ -111,9 +111,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
 
         # TODO: user activation through email confirmation.
-        require_email_confirmation = getattr(
-            settings, 'REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION', False
-        )
+        require_email_confirmation =\
+            settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
 
         if require_email_confirmation:
             user.is_active = False
@@ -133,9 +132,6 @@ class LoginSerializer(serializers.Serializer):
 
     :param username: ``USERNAME_FIELD`` for AUTH_USER_MODEL
     :param password: user's password
-
-    :TODO: It fits only ModelBackend of django. need to take\
-    other authentication backends.
     """
     username = serializers.CharField(
         label=_('Username'), max_length=254,
@@ -192,6 +188,24 @@ class LoginSerializer(serializers.Serializer):
                 self.error_messages['inactive'], code='inactive',
             )
 
+    def create(self, validated_data):
+        """persist a authenticated user in this step.
+
+        :param validated_data: validated_data should contains ``request``.\
+        You should pass request to serialzer.save.
+        """
+        user = self.get_user()
+        request = validated_data.get('request')
+        self.perform_login(request, user)
+
+        return user
+
+    def perform_login(self, request, user):
+        """Persist a user. Override this method if you do more than
+        persisting user.
+        """
+        login(request, user)
+
     def get_user(self):
         """
         :return: ``user`` instance created after ``self.validate``
@@ -221,9 +235,13 @@ class PasswordResetSerializer(serializers.Serializer):
         self.form = self.password_reset_form_class(data=self.initial_data)
         if not self.form.is_valid():
             if 'email' in self.form.errors:
-                raise serializers.ValidationError(self.form.errors['email'])
-            # XXX non email errors should be catched & re-raised
-            # (if django's PasswordResetForm add new fields)
+                messages = self.form.errors['email']
+            else:
+                # XXX non email errors should be catched & re-raised
+                # (if django's PasswordResetForm add new fields)
+                messages = self.form.errors
+
+            raise serializers.ValidationError(messages)
 
         return value
 

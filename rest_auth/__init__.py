@@ -67,4 +67,6 @@ Below API endpoints can be re-configured if you write your urls.py
     * see api lists
 """
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
+
+default_app_config = 'rest_auth.apps.AppConfig'
