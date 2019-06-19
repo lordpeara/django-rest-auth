@@ -8,7 +8,7 @@ django-rest-framework-auth
     :target: https://codecov.io/gh/lordpeara/django-rest-framework-auth
 
 .. image:: https://readthedocs.org/projects/django-rest-framework-auth/badge/?version=stable
-    :target: https://django-rest-framework-auth.readthedocs.io/en/latest/?badge=latest
+    :target: https://django-rest-framework-auth.readthedocs.io/en/stable/?badge=stable
 
 
 django-rest-framework-auth is a django & rest_framework application for
