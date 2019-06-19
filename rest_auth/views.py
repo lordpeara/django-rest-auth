@@ -16,7 +16,6 @@ import functools
 
 from django.conf import settings
 from django.contrib.auth import (
-    login as auth_login,
     logout as auth_logout,
 )
 from django.contrib.auth.views import (
@@ -60,7 +59,7 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_login(request, serializer.get_user())
+        serializer.save(request=request)
 
         data = self.get_response_data(serializer.data)
         headers = self.get_success_headers(serializer.data)
@@ -68,12 +67,6 @@ class LoginMixin(SuccessURLAllowedHostsMixin):
         return response.Response(
             data, status=status.HTTP_200_OK, headers=headers,
         )
-
-    def perform_login(self, request, user):
-        """Persist a user. Override this method if you do more than
-        persisting user.
-        """
-        auth_login(request, user)
 
     def get_response_data(self, data):
         """Override this method when you use ``response_includes_data`` and

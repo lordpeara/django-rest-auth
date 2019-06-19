@@ -4,7 +4,7 @@
 
 from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import get_user_model, login, password_validation
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.translation import ugettext_lazy as _
@@ -133,9 +133,6 @@ class LoginSerializer(serializers.Serializer):
 
     :param username: ``USERNAME_FIELD`` for AUTH_USER_MODEL
     :param password: user's password
-
-    :TODO: It fits only ModelBackend of django. need to take\
-    other authentication backends.
     """
     username = serializers.CharField(
         label=_('Username'), max_length=254,
@@ -191,6 +188,24 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 self.error_messages['inactive'], code='inactive',
             )
+
+    def create(self, validated_data):
+        """persist a authenticated user in this step.
+
+        :param validated_data: validated_data should contains ``request``.\
+        You should pass request to serialzer.save.
+        """
+        user = self.get_user()
+        request = validated_data.get('request')
+        self.perform_login(request, user)
+
+        return user
+
+    def perform_login(self, request, user):
+        """Persist a user. Override this method if you do more than
+        persisting user.
+        """
+        login(request, user)
 
     def get_user(self):
         """
