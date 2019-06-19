@@ -25,6 +25,8 @@ from django.contrib.auth.views import (
     SuccessURLAllowedHostsMixin,
 )
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from rest_framework import (
     generics, permissions, response, status, views,
 )
@@ -92,6 +94,8 @@ class LoginView(LoginMixin, generics.GenericAPIView):
     """LoginView for REST-API.
     """
     @method_decorator(sensitive_post_parameters())
+    @method_decorator(csrf_protect)
+    @method_decorator(never_cache)
     def post(self, request, *args, **kwargs):
         """Just calls ``LoginMixin.login``
         """
@@ -188,6 +192,8 @@ class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     @method_decorator(sensitive_post_parameters())
+    @method_decorator(csrf_protect)
+    @method_decorator(never_cache)
     def post(self, request, *args, **kwargs):
         """
         """
