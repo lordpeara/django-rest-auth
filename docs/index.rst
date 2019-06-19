@@ -54,4 +54,5 @@ Contents
 
    Installation <install>
    API References <api/index>
+   Configurations <configuration>
    Tricks & tips <tips>
