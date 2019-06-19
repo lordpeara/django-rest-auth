@@ -235,9 +235,13 @@ class PasswordResetSerializer(serializers.Serializer):
         self.form = self.password_reset_form_class(data=self.initial_data)
         if not self.form.is_valid():
             if 'email' in self.form.errors:
-                raise serializers.ValidationError(self.form.errors['email'])
-            # XXX non email errors should be catched & re-raised
-            # (if django's PasswordResetForm add new fields)
+                messages = self.form.errors['email']
+            else:
+                # XXX non email errors should be catched & re-raised
+                # (if django's PasswordResetForm add new fields)
+                messages = self.form.errors
+
+            raise serializers.ValidationError(messages)
 
         return value
 
