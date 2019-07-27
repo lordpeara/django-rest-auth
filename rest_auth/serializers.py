@@ -3,6 +3,7 @@
 """
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.contrib import auth
 from django.contrib.auth import get_user_model, login, password_validation
 from django.contrib.auth.forms import PasswordResetForm
@@ -47,6 +48,20 @@ class UserSerializer(serializers.ModelSerializer):
     default_error_messages = {
         'password_mismatch': _('2 passwords should be equal'),
     }
+
+    # EMAIL_FIELD_NAME = UserModel.get_email_field_name()
+
+    def __init__(self, *args, **kwargs):
+        super(UserSerializer, self).__init__(*args, **kwargs)
+
+        email_confirm = settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
+        if email_confirm and not hasattr(self, 'EMAIL_FIELD_NAME'):
+            raise ImproperlyConfigured(_(
+                '%s.EMAIL_FIELD_NAME is required if you want to '
+                'enable email verification on sign-up.' % (
+                    self.__class__.__name__,
+                )
+            ))
 
     class Meta:
         model = UserModel
