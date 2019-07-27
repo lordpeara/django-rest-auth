@@ -131,10 +131,20 @@ class UserSerializer(serializers.ModelSerializer):
 
         if require_email_confirmation:
             user.is_active = False
+            self.send_mail(user)
 
         user.save()
 
         return user
+
+    def send_mail(self, user, domain_override=None,
+                  subject_template_name='registration/verify_email.txt',
+                  email_template_name='registration/verify_email.html',
+                  use_https=False, token_generator=default_token_generator,
+                  from_email=None, request=None, html_email_template_name=None,
+                  extra_email_context=None):
+        # email = self.validated_data[self.EMAIL_FIELD_NAME]
+        pass
 
 
 class LoginSerializer(serializers.Serializer):
