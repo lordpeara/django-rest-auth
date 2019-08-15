@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import rest_framework
 from mock import patch
 from django import forms
 from django.contrib.auth import get_user_model
@@ -85,6 +86,13 @@ class UserSerializerTest(TestCase):
         serializer = UserSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('password1', serializer.errors)
+
+        if rest_framework.__version__ < '3.9.0':
+            self.skipTest(
+                'rest-framework versions under 3.9 collapses'
+                'VaildationError\'s `code`'
+            )
+
         self.assertEqual(
             serializer.errors['password1'][0].code,
             'password_too_short'
@@ -159,9 +167,9 @@ class LoginSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
 
-        self.assertSetEqual(
-            set(serializer.errors[api_settings.NON_FIELD_ERRORS_KEY]),
-            set([serializer.error_messages['inactive']])
+        self.assertEqual(
+            sorted(serializer.errors[api_settings.NON_FIELD_ERRORS_KEY]),
+            sorted([serializer.error_messages['inactive']])
         )
 
 
