@@ -10,7 +10,7 @@ setup(
 
     install_requires=[
         'Django<2.0,>=1.11.21;python_version<"3.0"',
-        'Django<2.2,>=2.1.9,>=2.0;python_version>="3.0"',
+        'Django<2.2,>=2.0;python_version>="3.0"',
         'djangorestframework>=3.7',
     ],
 
