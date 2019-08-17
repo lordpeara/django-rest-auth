@@ -53,7 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
         'password_mismatch': _('2 passwords should be equal'),
     }
 
-    # EMAIL_FIELD_NAME = UserModel.get_email_field_name()
+    EMAIL_FIELD_NAME = UserModel.get_email_field_name()
 
     def __init__(self, *args, **kwargs):
         super(UserSerializer, self).__init__(*args, **kwargs)
@@ -316,7 +316,6 @@ class PasswordResetSerializer(serializers.Serializer):
              extra_email_context=None):
         """sends a email, which contains link for resetting password
         """
-
         return self.form.save(
             domain_override=domain_override,
             subject_template_name=subject_template_name,
