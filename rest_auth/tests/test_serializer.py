@@ -55,7 +55,8 @@ class UserSerializerTest(TestCase):
         serializer = UserSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
-        user = serializer.save()
+        request = RequestFactory().get('/')
+        user = serializer.save(email_opts={'request': request})
         self.assertFalse(user.is_active)
         # TODO email sent for user confirmation
 
