@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """Serializer implementations for authentication.
 """
-
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model, login, password_validation
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ImproperlyConfigured
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
@@ -118,6 +122,7 @@ class UserSerializer(serializers.ModelSerializer):
         :param validated_data: validated data created after ``self.vaildate``
         """
         password = validated_data.pop('password1')
+        email_opts = validated_data.pop('email_opts', {})
         validated_data.pop('password2')
 
         # NOTE We should set user's password manually because
@@ -131,7 +136,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         if require_email_confirmation:
             user.is_active = False
-            self.send_mail(user)
+            self.send_mail(user, **email_opts)
 
         user.save()
 
@@ -143,8 +148,41 @@ class UserSerializer(serializers.ModelSerializer):
                   use_https=False, token_generator=default_token_generator,
                   from_email=None, request=None, html_email_template_name=None,
                   extra_email_context=None):
-        # email = self.validated_data[self.EMAIL_FIELD_NAME]
-        pass
+        """Send verification mail to newbie.
+        """
+        email = self.validated_data[self.EMAIL_FIELD_NAME]
+
+        if domain_override:
+            site_name = domain = domain_override
+        else:
+            current_site = get_current_site(request)
+            site_name = current_site.name
+            domain = current_site.domain
+
+        protocol = 'https' if use_https else 'http'
+        context = {
+            'email': email, 'domain': domain, 'site_name': site_name,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)), 'user': user,
+            'token': token_generator.make_token(user), 'protocol': protocol,
+        }
+        if extra_email_context is not None:
+            context.update(extra_email_context)
+
+        subject = loader.render_to_string(subject_template_name, context)
+        # Email subject *must not* contain newlines
+        subject = ''.join(subject.splitlines())
+        body = loader.render_to_string(email_template_name, context)
+
+        email_message = EmailMultiAlternatives(
+            subject, body, from_email, [email]
+        )
+        if html_email_template_name is not None:
+            html_email = loader.render_to_string(
+                html_email_template_name, context
+            )
+            email_message.attach_alternative(html_email, 'text/html')
+
+        email_message.send()
 
 
 class LoginSerializer(serializers.Serializer):
