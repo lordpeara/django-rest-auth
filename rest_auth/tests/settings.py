@@ -16,7 +16,7 @@ DEBUG = True
 SECRET_KEY = '--------------------------------------------------'
 
 INSTALLED_APPS = [
-    'rest_auth',
+    'rest_auth.apps.AppConfig',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,5 +55,3 @@ DATABASES = {
         'NAME': ':memory:',
     }
 }
-
-STATIC_URL = '/static/'
