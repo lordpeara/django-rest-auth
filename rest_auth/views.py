@@ -16,6 +16,7 @@ import functools
 
 from django.conf import settings
 from django.contrib.auth import (
+    get_user_model,
     logout as auth_logout,
 )
 from django.contrib.auth.views import (
@@ -28,14 +29,17 @@ from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from rest_framework import (
-    generics, permissions, response, status, views,
+    generics, permissions, response, status, views, viewsets,
 )
 
 from .contrib.rest_framework.decorators import sensitive_post_parameters
 from .serializers import (
     PasswordChangeSerializer,
     PasswordResetSerializer,
+    UserSerializer,
 )
+
+UserModel = get_user_model()
 
 
 class LoginMixin(SuccessURLAllowedHostsMixin):
@@ -119,7 +123,15 @@ class LogoutView(views.APIView):
         return response.Response(None, status=status.HTTP_200_OK)
 
 
-class PasswordForgotMixin(object):
+class EmailVerificationMixin(object):
+    def get_email_opts(self, **opts):
+        email_opts = {}
+        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
+        email_opts.update(opts)
+        return email_opts
+
+
+class PasswordForgotMixin(EmailVerificationMixin):
     """View for sending password-reset-link.
     """
     serializer_class = PasswordResetSerializer
@@ -134,15 +146,6 @@ class PasswordForgotMixin(object):
         serializer.save(**email_opts)
 
         return response.Response(None, status=status.HTTP_200_OK)
-
-    def get_email_opts(self, **opts):
-        """Override this method to add more options for sending emails.
-        """
-        email_opts = {}
-        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
-        email_opts.update(opts)
-
-        return email_opts
 
 
 class PasswordForgotView(PasswordForgotMixin, generics.GenericAPIView):
@@ -201,3 +204,14 @@ class PasswordChangeView(PasswordChangeMixin, generics.GenericAPIView):
         """
         """
         return self.reset(request, *args, **kwargs)
+
+
+class UserEmailVerificationMixin(EmailVerificationMixin):
+    def perform_create(self, serializer):
+        email_opts = self.get_email_opts(request=self.request)
+        serializer.save(email_opts=email_opts)
+
+
+class UserViewSet(UserEmailVerificationMixin, viewsets.ModelViewSet):
+    queryset = UserModel._default_manager.all()
+    serializer_class = UserSerializer

@@ -1,8 +1,9 @@
 from collections import OrderedDict
 
-from django.conf.urls import url
+from django.conf.urls import include, url
 from rest_framework.routers import APIRootView
 
+from . import routers
 from .views import (
     LoginView, LogoutView, PasswordChangeView, PasswordForgotConfirmView,
     PasswordForgotView, PasswordResetDoneView,
@@ -36,5 +37,7 @@ for pattern in urlpatterns:
 
 urlpatterns += [
     url(r'^api-root/$',
-        APIRootView.as_view(api_root_dict=api_root), name='api-root')
+        APIRootView.as_view(api_root_dict=api_root), name='api-root'),
+
+    url(r'user/', include(routers.router.urls)),
 ]
