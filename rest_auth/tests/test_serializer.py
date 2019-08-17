@@ -2,18 +2,18 @@
 from __future__ import unicode_literals
 
 import rest_framework
-from mock import patch
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.mail.backends.dummy import EmailBackend
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
-from rest_framework.settings import api_settings
+from mock import patch
 from rest_auth.serializers import (
     LoginSerializer, PasswordChangeSerializer, PasswordResetSerializer,
     UserSerializer,
 )
+from rest_framework.settings import api_settings
 
 UserModel = get_user_model()
 

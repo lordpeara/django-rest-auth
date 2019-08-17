@@ -1,2 +1,2 @@
 [flake8]
-import-order-style = pep8
+import-order-style = pycharm
