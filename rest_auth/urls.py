@@ -4,9 +4,8 @@ from django.conf.urls import url
 from rest_framework.routers import APIRootView
 
 from .views import (
-    LoginView, LogoutView,
+    LoginView, LogoutView, PasswordChangeView, PasswordForgotConfirmView,
     PasswordForgotView, PasswordResetDoneView,
-    PasswordForgotConfirmView, PasswordChangeView,
 )
 
 
