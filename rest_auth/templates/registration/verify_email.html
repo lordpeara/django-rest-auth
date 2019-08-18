@@ -1,0 +1,17 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}
+Thank you for creating new account on {{ site_name }}.
+Please verify your email and use full features of us.
+{% endblocktrans %}
+
+{% trans "Verify your email by clicking below link." %}
+{% block verify_email_link %}
+{{ protocol }}://{{ domain }}{% url 'verify_email_confirm' uidb64=uid token=token %}
+{% endblock %}
+{#{% trans "Your username, in case you've forgotten:" %} {{ user.get_username }}#}
+
+{% trans "Thanks for using our site!" %}
+
+{% blocktrans %}The {{ site_name }} team{% endblocktrans %}
+
+{% endautoescape %}
