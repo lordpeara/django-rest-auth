@@ -1,0 +1,20 @@
+{% extends "rest_auth/base.html" %}
+{% load i18n %}
+
+{% block breadcrumb %}
+<h4>{% trans "Email Verification" %}</h4>
+{% endblock breadcrumb %}
+
+{% block content %}
+
+{% if validlink %}
+
+<h5>{% trans "Email verification success." %}</h5>
+
+{% else %}
+
+<h5>{% trans "The email verification link was invalid, possibly because it has already been used.  Please request a new verification link." %}</h5>
+
+{% endif %}
+
+{% endblock %}
