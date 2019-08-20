@@ -116,14 +116,7 @@ class UserSerializerTest(TestCase):
         )
 
 
-class _TestModelBackend(object):
-    def authenticate(self, request, **credentials):
-        return UserModel.objects.get(username=credentials['username'])
-
-
 class LoginSerializerTest(TestCase):
-    CUSTOM_BACKEND = ('rest_auth.tests.test_serializer._TestModelBackend',)
-
     def setUp(self):
         self.user = UserModel._default_manager.create_user(
             username='test-user', email='test@test.com',
@@ -152,25 +145,6 @@ class LoginSerializerTest(TestCase):
         self.assertEqual(
             serializer.errors[api_settings.NON_FIELD_ERRORS_KEY][0].code,
             'invalid_login',
-        )
-
-    @override_settings(AUTHENTICATION_BACKENDS=CUSTOM_BACKEND)
-    def test_inactive_user_for_custom_modelbackend(self):
-        self.user.is_active = False
-        self.user.save()
-
-        data = {
-            'username': 'test-user',
-            'password': 'test-password',
-        }
-
-        serializer = LoginSerializer(data=data)
-        self.assertFalse(serializer.is_valid())
-        self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
-
-        self.assertEqual(
-            sorted(serializer.errors[api_settings.NON_FIELD_ERRORS_KEY]),
-            sorted([serializer.error_messages['inactive']])
         )
 
 
