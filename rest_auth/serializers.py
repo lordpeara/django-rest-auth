@@ -67,14 +67,6 @@ class LoginSerializer(serializers.Serializer):
         :exception VaildationError: if user are not allowed
         """
 
-        # XXX NOTE This condition doesn't have any effects
-        # if you use `django.contrib.auth.backends.ModelBackend`
-        # It's useful just for custom backends
-        if not user.is_active:
-            raise serializers.ValidationError(
-                self.error_messages['inactive'], code='inactive',
-            )
-
     def create(self, validated_data):
         """persist a authenticated user in this step.
 
