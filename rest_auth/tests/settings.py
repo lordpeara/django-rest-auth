@@ -16,6 +16,7 @@ DEBUG = True
 SECRET_KEY = '--------------------------------------------------'
 
 INSTALLED_APPS = [
+    'rest_auth.users.apps.AppConfig',
     'rest_auth.apps.AppConfig',
     'rest_framework',
     'django.contrib.auth',
@@ -32,7 +33,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'rest_auth.urls'
+ROOT_URLCONF = 'rest_auth.tests.urls'
 
 TEMPLATES = [
     {
