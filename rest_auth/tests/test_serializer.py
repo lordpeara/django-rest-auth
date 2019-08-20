@@ -11,8 +11,8 @@ from django.test.utils import override_settings
 from mock import patch
 from rest_auth.serializers import (
     LoginSerializer, PasswordChangeSerializer, PasswordResetSerializer,
-    UserSerializer,
 )
+from rest_auth.users.serializers import UserSerializer
 from rest_framework.settings import api_settings
 
 UserModel = get_user_model()
