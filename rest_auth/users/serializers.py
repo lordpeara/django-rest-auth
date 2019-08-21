@@ -126,17 +126,23 @@ class UserSerializer(serializers.ModelSerializer):
         user = super(UserSerializer, self).create(validated_data)
         user.set_password(password)
 
-        # TODO: user activation through email confirmation.
+        # user activation through email confirmation.
         require_email_confirmation =\
             settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
 
+        update_fields = ['password']
         if require_email_confirmation:
-            user.is_active = False
+            user, new_update_fields = self.set_user_as_unverified(user)
+            update_fields.extend(new_update_fields)
             self.send_mail(user, **email_opts)
 
-        user.save()
+        user.save(update_fields=update_fields)
 
         return user
+
+    def set_user_as_unverified(self, user):
+        user.is_active = False
+        return user, ['is_active']
 
     def send_mail(self, user, domain_override=None,
                   subject_template_name='registration/verify_email.txt',
