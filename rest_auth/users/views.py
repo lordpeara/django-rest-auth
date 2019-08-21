@@ -80,6 +80,15 @@ class EmailVerificationConfirmView(PasswordContextMixin, TemplateView):
 
         return self.render_to_response(self.get_context_data())
 
+    def get(self, request, *args, **kwargs):
+        self.set_user_as_verified(self.user)
+        _super = super(EmailVerificationConfirmView, self)
+        return _super.get(request, *args, **kwargs)
+
+    def set_user_as_verified(self, user):
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+
     def get_user(self, uidb64):
         try:
             uid = force_text(urlsafe_base64_decode(uidb64))
