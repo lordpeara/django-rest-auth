@@ -3,7 +3,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 from django.utils.encoding import force_bytes
@@ -50,18 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
     }
 
     EMAIL_FIELD_NAME = UserModel.get_email_field_name()
-
-    def __init__(self, *args, **kwargs):
-        super(UserSerializer, self).__init__(*args, **kwargs)
-
-        email_confirm = settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
-        if email_confirm and not hasattr(self, 'EMAIL_FIELD_NAME'):
-            raise ImproperlyConfigured(_(
-                '%s.EMAIL_FIELD_NAME is required if you want to '
-                'enable email verification on sign-up.' % (
-                    self.__class__.__name__,
-                )
-            ))
 
     class Meta:
         model = UserModel
