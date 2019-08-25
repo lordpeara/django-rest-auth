@@ -33,11 +33,18 @@ class UserEmailVerificationMixin(EmailVerificationMixin):
 
 
 class UserViewSet(UserEmailVerificationMixin, viewsets.ModelViewSet):
+    """Viewset for UserModel.
+    """
     queryset = UserModel._default_manager.all()
     serializer_class = UserSerializer
 
 
 class EmailVerificationConfirmView(PasswordContextMixin, TemplateView):
+    """Email verification view for newly-created User instances.
+
+    After user verified his/her email, users can use his/her full
+    features of website.
+    """
     template_name = 'registration/verify_email_confirm.html'
     token_generator = default_token_generator
     title = _('Email Verification')
