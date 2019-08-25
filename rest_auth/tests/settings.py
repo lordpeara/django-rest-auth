@@ -16,12 +16,13 @@ DEBUG = True
 SECRET_KEY = '--------------------------------------------------'
 
 INSTALLED_APPS = [
-    'rest_auth.users',
     'rest_auth',
+    'rest_auth.users',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
@@ -56,3 +57,5 @@ DATABASES = {
         'NAME': ':memory:',
     }
 }
+
+STATIC_URL = '/static/'
