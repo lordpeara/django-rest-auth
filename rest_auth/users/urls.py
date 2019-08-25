@@ -3,6 +3,9 @@ from django.conf.urls import include, url
 from . import routers
 from .views import EmailVerificationConfirmView
 
+
+app_name = 'rest_auth.users'
+
 urlpatterns = [
     url(r'^', include(routers.router.urls)),
     url(r'^v/'

@@ -29,7 +29,7 @@ class LoginViewTest(TestCase):
             'username': 'user',
             'password': 'pass',
         }
-        response = self.client.post(r('login'), data=data)
+        response = self.client.post(r('rest_auth:login'), data=data)
         self.assertEqual(response.status_code, 200)
         # response should be empty
         self.assertFalse(bool(response.content))
@@ -40,7 +40,7 @@ class LoginViewTest(TestCase):
             'username': 'user',
             'password': 'pass',
         }
-        response = self.client.post(r('login'), data=data)
+        response = self.client.post(r('rest_auth:login'), data=data)
         self.assertEqual(response.status_code, 200)
 
         # response should not contain `password`
@@ -58,11 +58,11 @@ class LogoutViewTest(TestCase):
     def test_permission(self):
         # anonymous user cannot access to logout
         self.client.logout()
-        response = self.client.post(r('logout'))
+        response = self.client.post(r('rest_auth:logout'))
         self.assertEqual(response.status_code, 403)
 
     def test_logout(self):
-        response = self.client.post(r('logout'))
+        response = self.client.post(r('rest_auth:logout'))
         self.assertEqual(response.status_code, 200)
 
 
@@ -74,7 +74,7 @@ class PasswordForgotViewTest(TestCase):
 
     def test_forgot(self):
         response = self.client.post(
-            r('forgot'), data={'email': self.user.email},
+            r('rest_auth:forgot'), data={'email': self.user.email},
         )
 
         self.assertEqual(response.status_code, 200)
@@ -89,17 +89,17 @@ class PasswordChangeViewTest(TestCase):
 
     def test_permission(self):
         self.client.logout()
-        response = self.client.post(r('password_change'))
+        response = self.client.post(r('rest_auth:password_change'))
         self.assertEqual(response.status_code, 403)
 
     def test_user_bound_serializer(self):
         # undefined method calls should initialize serializer normally.
-        response = self.client.get(r('password_change'))
+        response = self.client.get(r('rest_auth:password_change'))
         self.assertEqual(response.status_code, 405)
 
     def test_password_change(self):
         response = self.client.post(
-            r('password_change'), data={
+            r('rest_auth:password_change'), data={
                 'old_password': 'pass',
                 'new_password1': 'password1!',
                 'new_password2': 'password1!',
@@ -141,7 +141,7 @@ class EmailVerificationViewTest(TestCase):
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
         token = default_token_generator.make_token(user)
         self.client.get(
-            r('verify_email_confirm',
+            r('rest_auth.users:verify_email_confirm',
               kwargs=dict(uidb64=uidb64, token=token)),
             follow=True,
         )
@@ -150,7 +150,7 @@ class EmailVerificationViewTest(TestCase):
 
     def test_non_user(self):
         self.client.get(
-            r('verify_email_confirm',
+            r('rest_auth.users:verify_email_confirm',
               kwargs=dict(uidb64='abcd', token='efgh-ijkl')),
             follow=True,
         )
@@ -159,7 +159,7 @@ class EmailVerificationViewTest(TestCase):
         user = UserModel.objects.create(username='test-user')
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
         self.client.get(
-            r('verify_email_confirm',
+            r('rest_auth.users:verify_email_confirm',
               kwargs=dict(uidb64=uidb64, token='efgh-ijkl')),
             follow=True,
         )
@@ -168,7 +168,7 @@ class EmailVerificationViewTest(TestCase):
         user = UserModel.objects.create(username='test-user')
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
         self.client.get(r(
-            'verify_email_confirm',
+            'rest_auth.users:verify_email_confirm',
             kwargs=dict(
                 uidb64=uidb64,
                 token=EmailVerificationConfirmView.INTERNAL_VERIFY_URL_TOKEN
