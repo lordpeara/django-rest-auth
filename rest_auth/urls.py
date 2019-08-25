@@ -4,11 +4,12 @@ from django.conf.urls import url
 from rest_framework.routers import APIRootView
 
 from .views import (
-    LoginView, LogoutView,
+    LoginView, LogoutView, PasswordChangeView, PasswordForgotConfirmView,
     PasswordForgotView, PasswordResetDoneView,
-    PasswordForgotConfirmView, PasswordChangeView,
 )
 
+
+app_name = 'rest_auth'
 
 urlpatterns = [
     url(r'^login/$', LoginView.as_view(), name='login'),
@@ -37,5 +38,5 @@ for pattern in urlpatterns:
 
 urlpatterns += [
     url(r'^api-root/$',
-        APIRootView.as_view(api_root_dict=api_root), name='api-root')
+        APIRootView.as_view(api_root_dict=api_root), name='api-root'),
 ]

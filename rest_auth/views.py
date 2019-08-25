@@ -16,6 +16,7 @@ import functools
 
 from django.conf import settings
 from django.contrib.auth import (
+    get_user_model,
     logout as auth_logout,
 )
 from django.contrib.auth.views import (
@@ -36,6 +37,8 @@ from .serializers import (
     PasswordChangeSerializer,
     PasswordResetSerializer,
 )
+
+UserModel = get_user_model()
 
 
 class LoginMixin(SuccessURLAllowedHostsMixin):
@@ -119,7 +122,15 @@ class LogoutView(views.APIView):
         return response.Response(None, status=status.HTTP_200_OK)
 
 
-class PasswordForgotMixin(object):
+class EmailVerificationMixin(object):
+    def get_email_opts(self, **opts):
+        email_opts = {}
+        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
+        email_opts.update(opts)
+        return email_opts
+
+
+class PasswordForgotMixin(EmailVerificationMixin):
     """View for sending password-reset-link.
     """
     serializer_class = PasswordResetSerializer
@@ -134,15 +145,6 @@ class PasswordForgotMixin(object):
         serializer.save(**email_opts)
 
         return response.Response(None, status=status.HTTP_200_OK)
-
-    def get_email_opts(self, **opts):
-        """Override this method to add more options for sending emails.
-        """
-        email_opts = {}
-        email_opts.update(settings.REST_AUTH_EMAIL_OPTIONS)
-        email_opts.update(opts)
-
-        return email_opts
 
 
 class PasswordForgotView(PasswordForgotMixin, generics.GenericAPIView):

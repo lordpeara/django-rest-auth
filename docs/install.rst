@@ -40,5 +40,6 @@ Add ``rest_auth.urls`` to your ``urls.py``
 .. code-block:: python
 
     urlpatterns = [
-        url(r'^auth/', include('rest_auth.urls', namespace='auth')),
+        url(r'^auth/', include(('rest_auth.urls'))),
+        url(r'^auth/user/', include(('rest_auth.users.urls'))),
     ]

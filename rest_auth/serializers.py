@@ -1,125 +1,12 @@
 # -*- coding: utf-8 -*-
 """Serializer implementations for authentication.
 """
-
-from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth import get_user_model, login, password_validation
+from django.contrib.auth import login, password_validation
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
-
-UserModel = get_user_model()
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """User serializer for rest_framework & AUTH_USER_MODEL.
-
-    Fields & methods are built on a django's defualt ``User`` model.
-    Extend this serializer if you need your custom user model.
-
-    (Even if ``AUTH_USER_MODEL`` is can be customized, this is recommended
-    that You don't change & use customized user model.
-    using custom user model is very complex.)
-
-    :param username: ``USERNAME_FIELD`` of ``AUTH_USER_MODEL``
-    :param email: ``User.get_email_field_name()``
-    :param password1: password of a user (write_only, used only when created)
-    :param password2: password confirmation (write_only)
-
-    :TODO: Serializer Only implements creating. list/get are need to be implmtd
-    """
-    password1 = serializers.CharField(
-        label=_('Password'),
-        validators=[password_validation.validate_password],
-        help_text=password_validation.password_validators_help_text_html(),
-        write_only=True,
-        style={'input_type': 'password'},
-    )
-    password2 = serializers.CharField(
-        label=_('Password Confirmation'),
-        help_text=_('Enter the same password as before, for verification.'),
-        write_only=True,
-        style={'input_type': 'password'},
-    )
-
-    default_error_messages = {
-        'password_mismatch': _('2 passwords should be equal'),
-    }
-
-    class Meta:
-        model = UserModel
-        fields = (
-            UserModel.USERNAME_FIELD, UserModel.get_email_field_name(),
-            'password1', 'password2',
-        )
-
-        extra_kwargs = {
-            UserModel.get_email_field_name(): {
-                'required': True,
-                'allow_blank': False,
-            },
-        }
-
-    def validate(self, data):
-        """Vaildates if two passwords are equal.
-
-        :exception ValidationError: when 2 passwds are different
-        """
-        password1 = data.get('password1')
-        password2 = data.get('password2')
-
-        data['password2'] = self._validate_password2(password1, password2)
-
-        return data
-
-    def _validate_password2(self, password1, password2):
-        if password1 != password2:
-            raise serializers.ValidationError(
-                self.error_messages['password_mismatch'],
-                code='password_mismatch',
-            )
-
-        return password2
-
-    def create(self, validated_data):
-        """Creates user instance
-
-        CAVEAT:
-
-        A clear difference between django's ``ModelForm`` and rest_framework's
-        ``ModelSerializer`` is that, model serializer's ``save`` method doesn't
-        respect form's ``commit=True``.
-
-        Inside ``super().create``, a query is fired to create user,
-        and inside this, additional query is fired to save hashed password.
-        It's because ``ModelSerializer``'s ``create`` method uses
-        default manager's create function, ``Model._default_manager.create()``
-
-        (User model creation is recommended by calling ``UserManager``'s
-        ``create_user`` method)
-
-        :param validated_data: validated data created after ``self.vaildate``
-        """
-        password = validated_data.pop('password1')
-        validated_data.pop('password2')
-
-        # NOTE We should set user's password manually because
-        # ModelSerializer.create calls model._default_manager.save().
-        user = super(UserSerializer, self).create(validated_data)
-        user.set_password(password)
-
-        # TODO: user activation through email confirmation.
-        require_email_confirmation =\
-            settings.REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION
-
-        if require_email_confirmation:
-            user.is_active = False
-
-        user.save()
-
-        return user
 
 
 class LoginSerializer(serializers.Serializer):
@@ -179,14 +66,6 @@ class LoginSerializer(serializers.Serializer):
 
         :exception VaildationError: if user are not allowed
         """
-
-        # XXX NOTE This condition doesn't have any effects
-        # if you use `django.contrib.auth.backends.ModelBackend`
-        # It's useful just for custom backends
-        if not user.is_active:
-            raise serializers.ValidationError(
-                self.error_messages['inactive'], code='inactive',
-            )
 
     def create(self, validated_data):
         """persist a authenticated user in this step.
@@ -253,7 +132,6 @@ class PasswordResetSerializer(serializers.Serializer):
              extra_email_context=None):
         """sends a email, which contains link for resetting password
         """
-
         return self.form.save(
             domain_override=domain_override,
             subject_template_name=subject_template_name,

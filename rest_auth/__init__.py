@@ -65,8 +65,44 @@ Below API endpoints can be re-configured if you write your urls.py
 
 * GET /api-root/
     * see api lists
+
+
+API Endpoints (``rest_auth.users``)
+---------------------------------
+
+Below API endpoints can be accessed if you add ``rest_auth.users`` into
+``INSTALLED_APPS`` and add ``rest_auth.users.urls`` into your ``urls.py``
+
+
+* POST /user/
+    * username
+    * email
+    * password
+    * confirm_password
+
+    Create a user.
+
+    verification e-mail is sent when you set
+    ``REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION``
+
+* GET /user/
+
+    Show user list. Only privacy-safe user fields are visible.
+
+* GET /user/{pk}
+
+    Show a user.
+
+* DELETE /user/{pk}
+
+    Delete a user.
+
+* GET /user/v/{uid64}/{token}/
+
+    Verify user. After verification, user can use full features of websites.
+
 """
 
-__version__ = '0.8.2'
+__version__ = '0.9.0'
 
 default_app_config = 'rest_auth.apps.AppConfig'

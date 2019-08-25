@@ -9,8 +9,8 @@ python:
   - 3.6
 
 install:
-  - pip install -q -r requirements/requirements.txt
-  - pip install -q flake8 coverage codecov
+  - pip install -r requirements/requirements.txt
+  - pip install flake8 coverage codecov
 
 script:
   - "python -m coverage run ./manage.py test"

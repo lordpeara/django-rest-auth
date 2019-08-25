@@ -17,10 +17,12 @@ SECRET_KEY = '--------------------------------------------------'
 
 INSTALLED_APPS = [
     'rest_auth',
+    'rest_auth.users',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
@@ -32,7 +34,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'rest_auth.urls'
+ROOT_URLCONF = 'rest_auth.tests.urls'
 
 TEMPLATES = [
     {

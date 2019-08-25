@@ -2,20 +2,28 @@
 from __future__ import unicode_literals
 
 import rest_framework
-from mock import patch
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.mail.backends.dummy import EmailBackend
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
-from rest_framework.settings import api_settings
+from mock import patch
 from rest_auth.serializers import (
     LoginSerializer, PasswordChangeSerializer, PasswordResetSerializer,
-    UserSerializer,
 )
+from rest_auth.users.serializers import UserSerializer
+from rest_framework.settings import api_settings
 
 UserModel = get_user_model()
+
+
+class _TestEmailBackend(EmailBackend):
+    email_buffer = []
+
+    def send_messages(self, messages):
+        self.email_buffer.extend(list(messages))
+        return super(_TestEmailBackend, self).send_messages(messages)
 
 
 class UserSerializerTest(TestCase):
@@ -24,6 +32,8 @@ class UserSerializerTest(TestCase):
             'django.contrib.auth.password_validation.MinimumLengthValidator'
         ),
     }]
+
+    TEST_EMAIL_BACKEND = 'rest_auth.tests.test_serializer._TestEmailBackend'
 
     def test_create_user(self):
         data = {
@@ -44,6 +54,7 @@ class UserSerializerTest(TestCase):
         self.assertNotEqual(user.password, data['password1'])
 
     @override_settings(REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION=True)
+    @override_settings(EMAIL_BACKEND=TEST_EMAIL_BACKEND)
     def test_create_user_requires_email_confirmation(self):
         data = {
             'username': 'test-user',
@@ -55,9 +66,38 @@ class UserSerializerTest(TestCase):
         serializer = UserSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
-        user = serializer.save()
+        request = RequestFactory().get('/')
+        user = serializer.save(email_opts={'request': request})
         self.assertFalse(user.is_active)
-        # TODO email sent for user confirmation
+
+        # email should be sent for user confirmation
+        self.assertEqual(len(_TestEmailBackend.email_buffer), 1)
+
+        # check email message
+        msg = _TestEmailBackend.email_buffer.pop()
+        self.assertEqual(msg.to, [data['email']])
+
+    @override_settings(REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION=True)
+    def test_serializer_email_extra_context(self):
+        data = {
+            'username': 'test-user',
+            'email': 'a@a.com',
+            'password1': '23tf123g@f',
+            'password2': '23tf123g@f',
+        }
+
+        serializer = UserSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        request = RequestFactory().get('/')
+        serializer.save(
+            email_opts={
+                'request': request,
+                'domain_override': 'eugene.io',
+                'html_email_template_name': 'registration/verify_email.html',
+                'extra_email_context': {},
+            }
+        )
 
     def test_required_fields(self):
         data = {
@@ -69,9 +109,9 @@ class UserSerializerTest(TestCase):
 
         serializer = UserSerializer(data=data)
         self.assertFalse(serializer.is_valid())
-        self.assertSetEqual(
-            set(serializer.errors.keys()),
-            set(['username', 'email', 'password1', 'password2'])
+        self.assertEqual(
+            sorted(serializer.errors.keys()),
+            sorted(['username', 'email', 'password1', 'password2'])
         )
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=PASSWORD_VALIDATORS)
@@ -87,7 +127,9 @@ class UserSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn('password1', serializer.errors)
 
-        if rest_framework.__version__ < '3.9.0':
+        version = rest_framework.__version__.split('.')
+        version = tuple(map(int, version))
+        if version < (3, 9, 0):
             self.skipTest(
                 'rest-framework versions under 3.9 collapses'
                 'VaildationError\'s `code`'
@@ -115,14 +157,7 @@ class UserSerializerTest(TestCase):
         )
 
 
-class _TestModelBackend(object):
-    def authenticate(self, request, **credentials):
-        return UserModel.objects.get(username=credentials['username'])
-
-
 class LoginSerializerTest(TestCase):
-    CUSTOM_BACKEND = ('rest_auth.tests.test_serializer._TestModelBackend',)
-
     def setUp(self):
         self.user = UserModel._default_manager.create_user(
             username='test-user', email='test@test.com',
@@ -153,33 +188,6 @@ class LoginSerializerTest(TestCase):
             'invalid_login',
         )
 
-    @override_settings(AUTHENTICATION_BACKENDS=CUSTOM_BACKEND)
-    def test_inactive_user_for_custom_modelbackend(self):
-        self.user.is_active = False
-        self.user.save()
-
-        data = {
-            'username': 'test-user',
-            'password': 'test-password',
-        }
-
-        serializer = LoginSerializer(data=data)
-        self.assertFalse(serializer.is_valid())
-        self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
-
-        self.assertEqual(
-            sorted(serializer.errors[api_settings.NON_FIELD_ERRORS_KEY]),
-            sorted([serializer.error_messages['inactive']])
-        )
-
-
-class _TestEmailBackend(EmailBackend):
-    email_buffer = []
-
-    def send_messages(self, messages):
-        self.email_buffer.extend(list(messages))
-        return super(_TestEmailBackend, self).send_messages(messages)
-
 
 class PasswordResetSerializerTest(TestCase):
     TEST_EMAIL_BACKEND = 'rest_auth.tests.test_serializer._TestEmailBackend'
@@ -206,7 +214,7 @@ class PasswordResetSerializerTest(TestCase):
 
         # check email message
         msg = _TestEmailBackend.email_buffer.pop()
-        self.assertSetEqual(set(msg.to), set([data['email']]))
+        self.assertEqual(msg.to, [data['email']])
 
     @patch('django.forms.fields.EmailField.clean')
     def test_invalid_email(self, mock):
