@@ -67,11 +67,11 @@ Below API endpoints can be re-configured if you write your urls.py
     * see api lists
 
 
-API Endpoints (`rest_auth.users`)
+API Endpoints (``rest_auth.users``)
 ---------------------------------
 
-Below API endpoints can be accessed if you add `rest_auth.users` into
-`INSTALLED_APPS` and add `rest_auth.users.urls` into your `urls.py`
+Below API endpoints can be accessed if you add ``rest_auth.users`` into
+``INSTALLED_APPS`` and add ``rest_auth.users.urls`` into your ``urls.py``
 
 
 * POST /user/
@@ -83,7 +83,7 @@ Below API endpoints can be accessed if you add `rest_auth.users` into
     Create a user.
 
     verification e-mail is sent when you set
-    `REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION`
+    ``REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION``
 
 * GET /user/
 

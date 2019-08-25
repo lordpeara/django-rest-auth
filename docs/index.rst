@@ -37,8 +37,8 @@ Just install it, including urls and see APIs from your browsable API.
     # urls.py
     # ...
     urlpatterns += [
-        url(r'^auth/', 'rest_auth.urls', name='auth'),
-        url(r'^auth/user/', 'rest_auth.users.urls', name='auth_user'),
+        url(r'^auth/', include(('rest_auth.urls'))),
+        url(r'^auth/user/', include(('rest_auth.users.urls'))),
     ]
 
 .. code-block:: bash
