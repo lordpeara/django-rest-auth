@@ -103,6 +103,6 @@ Below API endpoints can be accessed if you add ``rest_auth.users`` into
 
 """
 
-__version__ = '0.8.2'
+__version__ = '0.9.0'
 
 default_app_config = 'rest_auth.apps.AppConfig'
