@@ -41,4 +41,5 @@ Add ``rest_auth.urls`` to your ``urls.py``
 
     urlpatterns = [
         url(r'^auth/', include('rest_auth.urls', namespace='auth')),
+        url(r'^auth/user/', 'rest_auth.users.urls', name='auth_user'),
     ]

@@ -11,6 +11,7 @@ Index
 .. toctree::
     :maxdepth: 1
 
-    rest_auth.serializers <serializers>
-    rest_auth.views <views>
+    rest_auth.serializers <rest_auth/serializers>
+    rest_auth.views <rest_auth/views>
+    rest_auth.users <rest_auth.users/index>
     rest_auth.contrib <contrib>
