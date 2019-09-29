@@ -3,3 +3,4 @@ flake8==3.7.7
 flake8-import-order==0.18.1
 mock==3.0.5
 tox==3.12.1
+flake8-bugbear==19.8.0
