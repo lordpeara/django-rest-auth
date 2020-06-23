@@ -29,7 +29,6 @@ Just install it, including urls and see APIs from your browsable API.
     INSTALLED_APPS = (
         # ...
         'rest_auth',
-        'rest_auth.users',
         'rest_framework',
         # ...
     )
