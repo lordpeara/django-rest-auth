@@ -11,8 +11,8 @@ from django.test.utils import override_settings
 from mock import patch
 from rest_auth.serializers import (
     LoginSerializer, PasswordChangeSerializer, PasswordResetSerializer,
+    SignupSerializer,
 )
-from rest_auth.users.serializers import UserSerializer
 from rest_framework.settings import api_settings
 
 UserModel = get_user_model()
@@ -26,7 +26,7 @@ class _TestEmailBackend(EmailBackend):
         return super(_TestEmailBackend, self).send_messages(messages)
 
 
-class UserSerializerTest(TestCase):
+class SignupSerializerTest(TestCase):
     PASSWORD_VALIDATORS = [{
         'NAME': (
             'django.contrib.auth.password_validation.MinimumLengthValidator'
@@ -43,14 +43,14 @@ class UserSerializerTest(TestCase):
             'password2': '23tf123g@f',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
         user = serializer.save()
         self.assertIsNotNone(user)
         # user is active
         self.assertTrue(user.is_active)
-        # UserSerializer should not save raw password
+        # SignupSerializer should not save raw password
         self.assertNotEqual(user.password, data['password1'])
 
     @override_settings(REST_AUTH_SIGNUP_REQUIRE_EMAIL_CONFIRMATION=True)
@@ -63,7 +63,7 @@ class UserSerializerTest(TestCase):
             'password2': '23tf123g@f',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
         request = RequestFactory().get('/')
@@ -86,7 +86,7 @@ class UserSerializerTest(TestCase):
             'password2': '23tf123g@f',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
         request = RequestFactory().get('/')
@@ -107,7 +107,7 @@ class UserSerializerTest(TestCase):
             'password2': '',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertEqual(
             sorted(serializer.errors.keys()),
@@ -123,7 +123,7 @@ class UserSerializerTest(TestCase):
             'password2': '23tf',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('password1', serializer.errors)
 
@@ -148,7 +148,7 @@ class UserSerializerTest(TestCase):
             'password2': '23tf123g@',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn(api_settings.NON_FIELD_ERRORS_KEY, serializer.errors)
         self.assertEqual(
