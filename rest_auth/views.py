@@ -24,6 +24,7 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     SuccessURLAllowedHostsMixin,
 )
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
@@ -163,6 +164,7 @@ class PasswordForgotConfirmView(PasswordResetConfirmView):
     should be done, by clicking password-reset-url we sent and moving to
     webpage to change password.
     """
+    success_url = reverse_lazy('rest_auth:password_reset_complete')
 
 
 class PasswordResetDoneView(PasswordResetCompleteView):
