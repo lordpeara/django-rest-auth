@@ -151,7 +151,7 @@ class UserSerializer(serializers.ModelSerializer):
         protocol = 'https' if use_https else 'http'
         context = {
             'email': email, 'domain': domain, 'site_name': site_name,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'user': user,
             'token': token_generator.make_token(user), 'protocol': protocol,
         }

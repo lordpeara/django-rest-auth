@@ -138,7 +138,7 @@ class EmailVerificationViewTest(TestCase):
         request = RequestFactory().get('/')
         user = serializer.save(email_opts={'request': request})
 
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         self.client.get(
             r('rest_auth.users:verify_email_confirm',
@@ -157,7 +157,7 @@ class EmailVerificationViewTest(TestCase):
 
     def test_invalid_token(self):
         user = UserModel.objects.create(username='test-user')
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         self.client.get(
             r('rest_auth.users:verify_email_confirm',
               kwargs=dict(uidb64=uidb64, token='efgh-ijkl')),
@@ -166,7 +166,7 @@ class EmailVerificationViewTest(TestCase):
 
     def test_invalid_session(self):
         user = UserModel.objects.create(username='test-user')
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         self.client.get(r(
             'rest_auth.users:verify_email_confirm',
             kwargs=dict(
