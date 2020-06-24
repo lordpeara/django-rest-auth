@@ -1,11 +1,14 @@
 from collections import OrderedDict
 
+from django.conf import settings
 from django.conf.urls import url
 from rest_framework.routers import APIRootView
 
 from .views import (
-    LoginView, LogoutView, PasswordChangeView, PasswordForgotConfirmView,
+    EmailVerificationConfirmView, LoginView, LogoutView,
+    PasswordChangeView, PasswordForgotConfirmView,
     PasswordForgotView, PasswordResetDoneView,
+    SignupView,
 )
 
 
@@ -28,15 +31,21 @@ urlpatterns = [
     url(r'^change-password/$',
         PasswordChangeView.as_view(),
         name='password_change'),
+
+    url(r'^signup/$', SignupView.as_view(), name='signup'),
+    url(r'^signup/v/'
+        r'(?P<uidb64>[0-9A-Za-z_\-]+)/'
+        r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        EmailVerificationConfirmView.as_view(), name='verify_email_confirm'),
 ]
 
 
-api_root = OrderedDict()
-for pattern in urlpatterns:
-    api_root[pattern.name] = pattern.name
+if settings.REST_AUTH_API_ROOT_VIEW:
+    api_root = OrderedDict()
+    for pattern in urlpatterns:
+        api_root[pattern.name] = pattern.name
 
-
-urlpatterns += [
-    url(r'^api-root/$',
-        APIRootView.as_view(api_root_dict=api_root), name='api-root'),
-]
+    urlpatterns += [
+        url(r'^$',
+            APIRootView.as_view(api_root_dict=api_root), name='api-root'),
+    ]

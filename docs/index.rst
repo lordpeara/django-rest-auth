@@ -29,7 +29,6 @@ Just install it, including urls and see APIs from your browsable API.
     INSTALLED_APPS = (
         # ...
         'rest_auth',
-        'rest_auth.users',
         'rest_framework',
         # ...
     )
@@ -38,7 +37,6 @@ Just install it, including urls and see APIs from your browsable API.
     # ...
     urlpatterns += [
         url(r'^auth/', include(('rest_auth.urls'))),
-        url(r'^auth/user/', include(('rest_auth.users.urls'))),
     ]
 
 .. code-block:: bash
