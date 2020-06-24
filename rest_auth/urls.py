@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.conf import settings
 from django.conf.urls import url
 from rest_framework.routers import APIRootView
 
@@ -39,12 +40,12 @@ urlpatterns = [
 ]
 
 
-api_root = OrderedDict()
-for pattern in urlpatterns:
-    api_root[pattern.name] = pattern.name
+if settings.REST_AUTH_API_ROOT_VIEW:
+    api_root = OrderedDict()
+    for pattern in urlpatterns:
+        api_root[pattern.name] = pattern.name
 
-
-urlpatterns += [
-    url(r'^api-root/$',
-        APIRootView.as_view(api_root_dict=api_root), name='api-root'),
-]
+    urlpatterns += [
+        url(r'^$',
+            APIRootView.as_view(api_root_dict=api_root), name='api-root'),
+    ]
