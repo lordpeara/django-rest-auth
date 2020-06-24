@@ -8,7 +8,7 @@ REST_AUTH_EMAIL_OPTIONS = {
 """Default: ``{}``
 
 Options for email, which is sent to reset password.
-Detail options guide `here. <>`_
+Detail options guide `here. </>`_
 """
 
 REST_AUTH_LOGIN_EMPTY_RESPONSE = True
@@ -31,6 +31,13 @@ If your sign-up process has verification-via-email, set this flag to
 
 .. WARNING::
     This functionality is not implemented yet.
+"""
+
+REST_AUTH_API_ROOT_VIEW = True
+"""Default: True
+
+Set this to ``False`` if you don't need to use
+rest_framwork's api documentation view. (like production environment)
 """
 
 prefix = 'REST_AUTH'

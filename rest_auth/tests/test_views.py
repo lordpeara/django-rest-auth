@@ -9,8 +9,8 @@ from django.test.utils import override_settings
 from django.urls import reverse as r
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from rest_auth.users.serializers import UserSerializer
-from rest_auth.users.views import (
+from rest_auth.serializers import SignupSerializer
+from rest_auth.views import (
     EmailVerificationConfirmView,
     UserEmailVerificationMixin,
 )
@@ -111,7 +111,7 @@ class PasswordChangeViewTest(TestCase):
 
 class EmailVerificationMixinTest(TestCase):
     def test_create(self):
-        serializer = UserSerializer(data={})
+        serializer = SignupSerializer(data={})
         mixin = UserEmailVerificationMixin()
         mixin.request = RequestFactory().get('/')
 
@@ -132,16 +132,16 @@ class EmailVerificationViewTest(TestCase):
             'password2': '23tf123g@f',
         }
 
-        serializer = UserSerializer(data=data)
+        serializer = SignupSerializer(data=data)
         self.assertTrue(serializer.is_valid())
 
         request = RequestFactory().get('/')
         user = serializer.save(email_opts={'request': request})
 
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         self.client.get(
-            r('rest_auth.users:verify_email_confirm',
+            r('rest_auth:verify_email_confirm',
               kwargs=dict(uidb64=uidb64, token=token)),
             follow=True,
         )
@@ -150,25 +150,25 @@ class EmailVerificationViewTest(TestCase):
 
     def test_non_user(self):
         self.client.get(
-            r('rest_auth.users:verify_email_confirm',
+            r('rest_auth:verify_email_confirm',
               kwargs=dict(uidb64='abcd', token='efgh-ijkl')),
             follow=True,
         )
 
     def test_invalid_token(self):
         user = UserModel.objects.create(username='test-user')
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         self.client.get(
-            r('rest_auth.users:verify_email_confirm',
+            r('rest_auth:verify_email_confirm',
               kwargs=dict(uidb64=uidb64, token='efgh-ijkl')),
             follow=True,
         )
 
     def test_invalid_session(self):
         user = UserModel.objects.create(username='test-user')
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         self.client.get(r(
-            'rest_auth.users:verify_email_confirm',
+            'rest_auth:verify_email_confirm',
             kwargs=dict(
                 uidb64=uidb64,
                 token=EmailVerificationConfirmView.INTERNAL_VERIFY_URL_TOKEN

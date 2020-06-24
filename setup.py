@@ -1,5 +1,5 @@
-from setuptools import setup, find_packages
 import rest_auth
+from setuptools import find_packages, setup
 
 
 setup(
@@ -9,8 +9,8 @@ setup(
     scripts=[],
 
     install_requires=[
-        'Django<2.0,>=1.11.21;python_version<"3.0"',
-        'Django<2.2,>=2.0;python_version>="3.0"',
+        'Django>=1.11.23,<2.0;python_version<"3.0"',
+        'Django>=2.2.13,<3.0;python_version>="3.0"',
         'djangorestframework>=3.7',
     ],
 
@@ -25,10 +25,8 @@ setup(
     include_package_data=True,
 
     classifiers=[
-        # 'Framework :: Django',
-        # 'Intended Audience :: Developers',
-        # 'Intended Audience :: System Administrators',
-        # 'Operating System :: OS Independent',
-        # 'Topic :: Software Development'
+        'Framework :: Django',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
     ],
 )
