@@ -248,7 +248,7 @@ class PasswordChangeSerializer(SetPasswordSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
-    """User serializer for rest_framework & AUTH_USER_MODEL.
+    """Signup serializer for rest_framework & AUTH_USER_MODEL.
 
     Fields & methods are built on a django's defualt ``User`` model.
     Extend this serializer if you need your custom user model.
